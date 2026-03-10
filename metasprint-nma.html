@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob:; connect-src *; img-src 'self' data: blob:; frame-ancestors 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob:; connect-src 'self' https://eutils.ncbi.nlm.nih.gov https://api.openalex.org https://clinicaltrials.gov https://classic.clinicaltrials.gov https://aact-ctti.org https://aact.ctti-clinicaltrials.org http://localhost:8000 http://localhost:8765; img-src 'self' data: blob:; frame-ancestors 'self';">
 <title>MetaSprint NMA — Zero-Install Network Meta-Analysis Platform</title>
 <style>
 :root {
@@ -122,6 +122,19 @@ button:hover { background: var(--primary-hover); }
 .badge-exclude { background: #fee2e2; color: #991b1b; }
 .badge-maybe { background: #fef3c7; color: #92400e; }
 .badge-duplicate { background: #e2e8f0; color: #475569; }
+.source-badge { font-size: 0.68rem; padding: 1px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+.source-badge.ctgov { background: #065f46; color: #6ee7b7; }
+.source-badge.pubmed { background: #1e3a5f; color: #93c5fd; }
+.source-badge.both { background: #78350f; color: #fbbf24; }
+.source-badge.manual { background: #334155; color: #94a3b8; }
+.evidence-text { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; background: var(--bg-alt); padding: 4px 8px; border-radius: 4px; margin-top: 4px; line-height: 1.4; max-height: 80px; overflow-y: auto; }
+.evidence-highlight { background: rgba(251, 191, 36, 0.35); color: #fbbf24; font-weight: 700; padding: 0 2px; border-radius: 2px; }
+.extract-review-trial { border-bottom: 1px solid var(--border); padding: 10px 14px; }
+.extract-review-trial:last-child { border-bottom: none; }
+.extract-review-outcome { margin: 6px 0 6px 20px; padding: 8px 10px; background: var(--bg-alt); border-radius: 6px; border-left: 3px solid var(--primary); }
+.extract-review-outcome.pubmed-only { border-left-color: #3b82f6; }
+.extract-review-value { font-weight: 700; font-size: 0.95rem; }
+.extract-review-value input { width: 70px; font-size: 0.85rem; padding: 2px 4px; border: 1px solid var(--border); border-radius: 3px; background: var(--surface); color: var(--text); text-align: center; }
 
 .ref-detail {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -177,7 +190,7 @@ button:hover { background: var(--primary-hover); }
 .autoscreen-scores .sa { color: #3b82f6; } .autoscreen-scores .sb { color: #8b5cf6; }
 .ref-item .autoscreen-verdict { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; }
 .autoscreen-verdict.auto-include { color: #15803d; } .autoscreen-verdict.auto-exclude { color: #64748b; }
-.autoscreen-verdict.needs-review { color: #d97706; }
+.autoscreen-verdict.needs-review { color: #a16207; }
 .threshold-group { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .threshold-group label { font-size: 0.78rem; color: var(--text-muted); }
 .threshold-group input[type="range"] { width: 100px; }
@@ -460,7 +473,7 @@ button:hover { background: var(--primary-hover); }
     --bg: #0f172a; --surface: #1e293b; --surface-alt: #273449; --text: #e2e8f0;
     --text-muted: #bdc8d6; --border: #334155;
     --primary: #3b82f6; --primary-hover: #2563eb;
-    --success: #10b981; --warning: #d97706; --danger: #ef4444;
+    --success: #10b981; --warning: #fbbf24; --danger: #ef4444;
     --info: #818cf8;
   }
   body:not(.light-forced) .ref-item:hover { background: #334155; }
@@ -476,7 +489,7 @@ body.dark-mode {
   --bg: #0f172a; --surface: #1e293b; --surface-alt: #273449; --text: #e2e8f0;
   --text-muted: #bdc8d6; --border: #334155;
   --primary: #3b82f6; --primary-hover: #2563eb;
-  --success: #10b981; --warning: #d97706; --danger: #ef4444;
+  --success: #10b981; --warning: #fbbf24; --danger: #ef4444;
   --info: #818cf8;
 }
 body.dark-mode .ref-item:hover { background: #334155; }
@@ -1134,14 +1147,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
           <strong>Start here:</strong> Ayat Universe (overview) &rarr; Treemap (volume) &rarr; Gap Scatter (find gaps) &rarr; Al-Burhan (auto-meta-analysis). Hover any tab for details.
         </div>
         <div class="universe-view-tabs" id="universeViewTabs" style="display:none" role="tablist">
-          <button class="view-tab" data-view="alburhan" onclick="switchUniverseView('alburhan')" role="tab" aria-selected="false" title="Al-Burhan (Living Meta-Analysis): Auto-pools trials into meta-analyses with forest plots, GRADE, and guideline context">Al-Burhan</button>
-          <button class="view-tab active" data-view="ayat" onclick="switchUniverseView('ayat')" role="tab" aria-selected="true" title="Ayat Universe: Deep-sky map of all trials — each dot is a trial, clustered by drug class and outcome">Ayat Universe</button>
-          <button class="view-tab" data-view="network" onclick="switchUniverseView('network')" role="tab" aria-selected="false" title="Network: Force-directed graph showing which interventions have been compared head-to-head">Network</button>
-          <button class="view-tab" data-view="treemap" onclick="switchUniverseView('treemap')" role="tab" aria-selected="false" title="Treemap: Proportional area chart — bigger boxes = more trials in that drug class">Treemap</button>
-          <button class="view-tab" data-view="timeline" onclick="switchUniverseView('timeline')" role="tab" aria-selected="false" title="Timeline: When trials started/completed, showing research activity over time">Timeline</button>
-          <button class="view-tab" data-view="matrix" onclick="switchUniverseView('matrix')" role="tab" aria-selected="false" title="I x O Matrix: Intervention-by-Outcome cross-tabulation — find which drug-outcome pairs have evidence">I x O Matrix</button>
-          <button class="view-tab" data-view="gapscatter" onclick="switchUniverseView('gapscatter')" role="tab" aria-selected="false" title="Gap Scatter: Plots evidence gaps — high gap score = under-studied drug-outcome pair worth investigating">Gap Scatter</button>
-          <button class="view-tab" data-view="pipeline" onclick="switchUniverseView('pipeline')" role="tab" aria-selected="false" title="Phase Pipeline: Trial phase distribution (I/II/III/IV) for each drug class — where is the research?">Phase Pipeline</button>
+          <button class="view-tab" data-view="alburhan" onclick="switchUniverseView('alburhan')" role="tab" aria-selected="false" tabindex="-1" title="Al-Burhan (Living Meta-Analysis): Auto-pools trials into meta-analyses with forest plots, GRADE, and guideline context">Al-Burhan</button>
+          <button class="view-tab active" data-view="ayat" onclick="switchUniverseView('ayat')" role="tab" aria-selected="true" tabindex="0" title="Ayat Universe: Deep-sky map of all trials — each dot is a trial, clustered by drug class and outcome">Ayat Universe</button>
+          <button class="view-tab" data-view="network" onclick="switchUniverseView('network')" role="tab" aria-selected="false" tabindex="-1" title="Network: Force-directed graph showing which interventions have been compared head-to-head">Network</button>
+          <button class="view-tab" data-view="treemap" onclick="switchUniverseView('treemap')" role="tab" aria-selected="false" tabindex="-1" title="Treemap: Proportional area chart — bigger boxes = more trials in that drug class">Treemap</button>
+          <button class="view-tab" data-view="timeline" onclick="switchUniverseView('timeline')" role="tab" aria-selected="false" tabindex="-1" title="Timeline: When trials started/completed, showing research activity over time">Timeline</button>
+          <button class="view-tab" data-view="matrix" onclick="switchUniverseView('matrix')" role="tab" aria-selected="false" tabindex="-1" title="I x O Matrix: Intervention-by-Outcome cross-tabulation — find which drug-outcome pairs have evidence">I x O Matrix</button>
+          <button class="view-tab" data-view="gapscatter" onclick="switchUniverseView('gapscatter')" role="tab" aria-selected="false" tabindex="-1" title="Gap Scatter: Plots evidence gaps — high gap score = under-studied drug-outcome pair worth investigating">Gap Scatter</button>
+          <button class="view-tab" data-view="pipeline" onclick="switchUniverseView('pipeline')" role="tab" aria-selected="false" tabindex="-1" title="Phase Pipeline: Trial phase distribution (I/II/III/IV) for each drug class — where is the research?">Phase Pipeline</button>
         </div>
         <div class="universe-vis-container" id="universeVisContainer">
           <canvas id="ayatCanvas" class="universe-canvas universe-view active" aria-label="Ayat Universe — deep evidence landscape" style="height:600px"></canvas>
@@ -1154,10 +1167,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
           <div id="alBurhanStatusBar" style="display:none;padding:4px 12px;background:#1e293b;color:#94a3b8;font-size:0.75rem;border-bottom:1px solid #334155;font-family:system-ui" role="status" aria-live="polite"></div>
           <svg id="networkSvg" class="network-svg universe-view" viewBox="0 0 800 500"
                role="img" aria-label="Network graph of cardiovascular trial subcategories"></svg>
-          <canvas id="treemapCanvas" class="universe-canvas universe-view" aria-label="Evidence treemap"></canvas>
-          <canvas id="timelineCanvas" class="universe-canvas universe-view" aria-label="Timeline of RCT activity"></canvas>
-          <canvas id="matrixCanvas" class="universe-canvas universe-view" aria-label="Intervention outcome matrix"></canvas>
-          <canvas id="gapScatterCanvas" class="universe-canvas universe-view" aria-label="Gap analysis scatter plot"></canvas>
+          <canvas id="treemapCanvas" class="universe-canvas universe-view" role="img" aria-label="Evidence treemap"></canvas>
+          <canvas id="timelineCanvas" class="universe-canvas universe-view" role="img" aria-label="Timeline of RCT activity"></canvas>
+          <canvas id="matrixCanvas" class="universe-canvas universe-view" role="img" aria-label="Intervention outcome matrix"></canvas>
+          <canvas id="gapScatterCanvas" class="universe-canvas universe-view" role="img" aria-label="Gap analysis scatter plot"></canvas>
           <svg id="pipelineSvg" class="network-svg universe-view" viewBox="0 0 900 500"
                role="img" aria-label="Trial phase pipeline"></svg>
         </div>
@@ -1190,8 +1203,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
         </div>
         <div id="kitabSearchRow" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
           <div style="position:relative;flex:1;min-width:200px">
-            <input type="text" id="fihrisSearch" placeholder="Search the evidence... (e.g., SGLT2 mortality, empagliflozin)" style="width:100%;padding:6px 32px 6px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.82rem;background:var(--surface);color:var(--text)" oninput="debounceFihrisSearch(this.value)">
-            <span id="fihrisSearchClear" onclick="clearFihrisSearch()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1rem;color:var(--text-muted);display:none" title="Clear search">&times;</span>
+            <input type="text" id="fihrisSearch" placeholder="Search the evidence... (e.g., SGLT2 mortality, empagliflozin)" aria-label="Search the evidence landscape" style="width:100%;padding:6px 32px 6px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.82rem;background:var(--surface);color:var(--text)" oninput="debounceFihrisSearch(this.value)">
+            <button id="fihrisSearchClear" onclick="clearFihrisSearch()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1rem;color:var(--text-muted);display:none;background:none;border:none;padding:2px 4px" aria-label="Clear search">&times;</button>
           </div>
           <span id="fihrisResultBadge" style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap"></span>
           <label style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px;margin-left:8px">
@@ -1261,7 +1274,16 @@ body.dark-mode .input-error { background: #451a1a !important; }
       <p class="text-muted" style="font-size:0.75rem;margin-top:4px">
         Cardio-only sources: PubMed, OpenAlex, CT.gov + optional AACT PostgreSQL (run <code>python aact_proxy.py</code> for local AACT)
       </p>
-      <div id="searchStatus"></div>
+      <div id="searchStatus" role="status" aria-live="polite"></div>
+      <div id="autoExtractRow" style="display:none;margin:10px 0;padding:10px;background:var(--bg-alt);border:1px solid var(--border);border-radius:8px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button id="autoExtractBtn" class="btn-success" onclick="runAutoExtract()" aria-label="Auto-extract effect sizes from open-access sources">Auto-Extract from OA Sources</button>
+          <span id="autoExtractStatus" class="text-muted" style="font-size:0.82rem" role="status" aria-live="polite"></span>
+          <span id="autoExtractCount" class="text-muted" style="font-size:0.78rem"></span>
+        </div>
+        <p class="text-muted" style="font-size:0.72rem;margin-top:4px">Extracts HR/OR/RR/MD from CT.gov results sections and PubMed structured abstracts. Every number shown with source evidence for verification.</p>
+      </div>
+      <div id="extractionReviewPanel" style="display:none;margin:10px 0;border:1px solid var(--border);border-radius:8px;background:var(--surface);max-height:70vh;overflow-y:auto" role="region" aria-label="Extraction review panel"></div>
       <div id="searchResults"></div>
     </section>
 
@@ -1614,21 +1636,21 @@ body.dark-mode .input-error { background: #451a1a !important; }
       <h2>Evidence Insights</h2>
       <p class="text-muted" style="margin-bottom:12px">Deep evidence analysis inspired by Quranic epistemological principles. Select a sub-tab to explore.</p>
       <div class="insights-nav" role="tablist" aria-label="Insight sub-tabs">
-        <button class="insights-tab active" id="tab-insight-tawakkul" data-insight="tawakkul" role="tab" aria-selected="true" aria-controls="insight-tawakkul" title="Trust Decomposition: 8-axis radar of evidence trustworthiness">Tawakkul</button>
-        <button class="insights-tab" id="tab-insight-mizan" data-insight="mizan" role="tab" aria-selected="false" aria-controls="insight-mizan" title="Harm-Benefit Equipoise: Balance-scale visualization">Mizan</button>
-        <button class="insights-tab" id="tab-insight-shura" data-insight="shura" role="tab" aria-selected="false" aria-controls="insight-shura" title="Multiverse Specification Curve: Sensitivity to analytic choices">Shura</button>
-        <button class="insights-tab" id="tab-insight-hikmah" data-insight="hikmah" role="tab" aria-selected="false" aria-controls="insight-hikmah" title="Clinical Decision Context: Personalized NNT calculator">Hikmah</button>
-        <button class="insights-tab" id="tab-insight-fitrah" data-insight="fitrah" role="tab" aria-selected="false" aria-controls="insight-fitrah" title="Natural Query Interface: Ask questions in plain language">Fitrah</button>
-        <button class="insights-tab" id="tab-insight-ihsan" data-insight="ihsan" role="tab" aria-selected="false" aria-controls="insight-ihsan" title="Excellence Visualization: Icon arrays, quantile dots, timelines">Ihsan</button>
-        <button class="insights-tab" id="tab-insight-amanah" data-insight="amanah" role="tab" aria-selected="false" aria-controls="insight-amanah" title="Evidence Gap Registry: Structured gap accountability">Amanah</button>
-        <button class="insights-tab" id="tab-insight-taqwa" data-insight="taqwa" role="tab" aria-selected="false" aria-controls="insight-taqwa" title="Integrity Sentinel: GRIM test, retraction checks, funding bias">Taqwa</button>
-        <button class="insights-tab" id="tab-insight-dhulm" data-insight="dhulm" role="tab" aria-selected="false" aria-controls="insight-dhulm" title="Health Equity Detector: Representation justice analysis">Dhulm</button>
-        <button class="insights-tab" id="tab-insight-rahma" data-insight="rahma" role="tab" aria-selected="false" aria-controls="insight-rahma" title="Patient-Facing Translation: Plain-language summaries">Rahma</button>
-        <button class="insights-tab" id="tab-insight-tabayyun" data-insight="tabayyun" role="tab" aria-selected="false" aria-controls="insight-tabayyun" title="Verification Engine: Cross-source verification states (49:6)">Tabayyun</button>
-        <button class="insights-tab" id="tab-insight-living" data-insight="living" role="tab" aria-selected="false" aria-controls="insight-living" title="Living Evidence: Currency tracking, update triggers, version deltas">Living</button>
-        <button class="insights-tab" id="tab-insight-conflict" data-insight="conflict" role="tab" aria-selected="false" aria-controls="insight-conflict" title="Conflict Detector: Contradictory outcomes across sources">Conflicts</button>
-        <button class="insights-tab" id="tab-insight-radar" data-insight="radar" role="tab" aria-selected="false" aria-controls="insight-radar" title="Opportunity Radar: New evidence since last meta-analysis">Radar</button>
-        <button class="insights-tab" id="tab-insight-registry" data-insight="registry" role="tab" aria-selected="false" aria-controls="insight-registry" title="Registry Graph: NCT/PMID/DOI canonical record linking">Registry</button>
+        <button class="insights-tab active" id="tab-insight-tawakkul" data-insight="tawakkul" role="tab" aria-selected="true" aria-controls="insight-tawakkul" tabindex="0" title="Trust Decomposition: 8-axis radar of evidence trustworthiness">Tawakkul</button>
+        <button class="insights-tab" id="tab-insight-mizan" data-insight="mizan" role="tab" aria-selected="false" aria-controls="insight-mizan" tabindex="-1" title="Harm-Benefit Equipoise: Balance-scale visualization">Mizan</button>
+        <button class="insights-tab" id="tab-insight-shura" data-insight="shura" role="tab" aria-selected="false" aria-controls="insight-shura" tabindex="-1" title="Multiverse Specification Curve: Sensitivity to analytic choices">Shura</button>
+        <button class="insights-tab" id="tab-insight-hikmah" data-insight="hikmah" role="tab" aria-selected="false" aria-controls="insight-hikmah" tabindex="-1" title="Clinical Decision Context: Personalized NNT calculator">Hikmah</button>
+        <button class="insights-tab" id="tab-insight-fitrah" data-insight="fitrah" role="tab" aria-selected="false" aria-controls="insight-fitrah" tabindex="-1" title="Natural Query Interface: Ask questions in plain language">Fitrah</button>
+        <button class="insights-tab" id="tab-insight-ihsan" data-insight="ihsan" role="tab" aria-selected="false" aria-controls="insight-ihsan" tabindex="-1" title="Excellence Visualization: Icon arrays, quantile dots, timelines">Ihsan</button>
+        <button class="insights-tab" id="tab-insight-amanah" data-insight="amanah" role="tab" aria-selected="false" aria-controls="insight-amanah" tabindex="-1" title="Evidence Gap Registry: Structured gap accountability">Amanah</button>
+        <button class="insights-tab" id="tab-insight-taqwa" data-insight="taqwa" role="tab" aria-selected="false" aria-controls="insight-taqwa" tabindex="-1" title="Integrity Sentinel: GRIM test, retraction checks, funding bias">Taqwa</button>
+        <button class="insights-tab" id="tab-insight-dhulm" data-insight="dhulm" role="tab" aria-selected="false" aria-controls="insight-dhulm" tabindex="-1" title="Health Equity Detector: Representation justice analysis">Dhulm</button>
+        <button class="insights-tab" id="tab-insight-rahma" data-insight="rahma" role="tab" aria-selected="false" aria-controls="insight-rahma" tabindex="-1" title="Patient-Facing Translation: Plain-language summaries">Rahma</button>
+        <button class="insights-tab" id="tab-insight-tabayyun" data-insight="tabayyun" role="tab" aria-selected="false" aria-controls="insight-tabayyun" tabindex="-1" title="Verification Engine: Cross-source verification states (49:6)">Tabayyun</button>
+        <button class="insights-tab" id="tab-insight-living" data-insight="living" role="tab" aria-selected="false" aria-controls="insight-living" tabindex="-1" title="Living Evidence: Currency tracking, update triggers, version deltas">Living</button>
+        <button class="insights-tab" id="tab-insight-conflict" data-insight="conflict" role="tab" aria-selected="false" aria-controls="insight-conflict" tabindex="-1" title="Conflict Detector: Contradictory outcomes across sources">Conflicts</button>
+        <button class="insights-tab" id="tab-insight-radar" data-insight="radar" role="tab" aria-selected="false" aria-controls="insight-radar" tabindex="-1" title="Opportunity Radar: New evidence since last meta-analysis">Radar</button>
+        <button class="insights-tab" id="tab-insight-registry" data-insight="registry" role="tab" aria-selected="false" aria-controls="insight-registry" tabindex="-1" title="Registry Graph: NCT/PMID/DOI canonical record linking">Registry</button>
       </div>
 
       <!-- Tawakkul: Trust Decomposition -->
@@ -1887,6 +1909,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
   <div id="undoContainer"></div>
 
   <script>
+  // Polyfill: AbortSignal.timeout (Safari <16.4, older Chrome)
+  if (typeof AbortSignal !== 'undefined' && !AbortSignal.timeout) {
+    AbortSignal.timeout = function(ms) { var c = new AbortController(); setTimeout(function() { c.abort(new DOMException('TimeoutError', 'TimeoutError')); }, ms); return c.signal; };
+  }
   // ============================================================
   // OBSERVABILITY — Central structured logger
   // ============================================================
@@ -1986,7 +2012,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const container = document.getElementById('toastContainer');
     const el = document.createElement('div');
     el.className = 'toast toast-' + type;
-    if (type === 'danger') el.setAttribute('role', 'alert');
+    el.setAttribute('role', type === 'danger' || type === 'warning' ? 'alert' : 'status');
     el.textContent = msg;
     container.appendChild(el);
     setTimeout(() => el.remove(), duration);
@@ -2053,7 +2079,15 @@ body.dark-mode .input-error { background: #451a1a !important; }
       function onCancel() { cleanup(null); }
       function onKey(e) {
         if (e.key === 'Escape') cleanup(null);
-        if (e.key === 'Enter') cleanup(inputEl.value);
+        else if (e.key === 'Enter') cleanup(inputEl.value);
+        else if (e.key === 'Tab') {
+          var focusable = overlay.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
+          if (focusable.length > 0) {
+            var first = focusable[0], last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          }
+        }
       }
       ok.addEventListener('click', onOk);
       cancel.addEventListener('click', onCancel);
@@ -2096,12 +2130,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
   }
 
   // --- Onboarding ---
+  var _onboardPrevFocus = null;
   function showOnboarding() {
-    document.getElementById('onboardOverlay').style.display = 'flex';
+    _onboardPrevFocus = document.activeElement;
+    var overlay = document.getElementById('onboardOverlay');
+    overlay.style.display = 'flex';
+    var btn = overlay.querySelector('button');
+    if (btn) btn.focus();
   }
   function dismissOnboarding() {
     document.getElementById('onboardOverlay').style.display = 'none';
     try { localStorage.setItem('metaSprintNMA_onboarded', '1'); } catch(e) { console.warn('localStorage unavailable:', e.message); }
+    if (_onboardPrevFocus) { _onboardPrevFocus.focus(); _onboardPrevFocus = null; }
   }
 
   // --- Search audit trail ---
@@ -2982,9 +3022,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
           : (o.recentRCTs + ' recent RCTs, ' + o.maCount + ' MAs');
         const label = o._mode === 'pair' ? (getSubcategory(o.subcategory)?.label || o.subcategory) : o.label;
         const subcatId = o._mode === 'pair' ? o.subcategory : o.id;
-        const subcatArg = String(subcatId || '').replace(/'/g, "\\'");
+        const subcatArg = escapeHtml(String(subcatId || '').replace(/'/g, "\\'"));
         return '<div class="opportunity-item">' +
-          '<span class="opp-score' + cls + '">' + o.opportunity + '</span>' +
+          '<span class="opp-score' + cls + '">' + escapeHtml(o.opportunity || '') + '</span>' +
           '<span>' + escapeHtml(label) + ' — ' + escapeHtml(detail) + '</span>' +
           '<button class="opp-start-btn" onclick="exploreOpportunitySubcategory(\'' +
             subcatArg + '\')">Explore</button>' +
@@ -3280,7 +3320,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         const cls = j || 'empty';
         return '<td><span class="rob-dot ' + cls + '" title="' + escapeHtml(j || 'Not assessed') + '"></span></td>';
       }).join('');
-      return '<tr><td style="text-align:left;cursor:pointer;font-weight:500" onclick="openRoBEntry(\'' + escapeHtml(r.studyId) + '\')">' + escapeHtml(r.authorYear || r.studyId) + ' &#9998;</td>' + cells + '</tr>';
+      return '<tr><td style="text-align:left;cursor:pointer;font-weight:500" tabindex="0" role="button" onclick="openRoBEntry(\'' + escapeHtml(r.studyId) + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openRoBEntry(\'' + escapeHtml(r.studyId) + '\')}">' + escapeHtml(r.authorYear || r.studyId) + ' &#9998;</td>' + cells + '</tr>';
     }).join('');
     container.innerHTML = '<table class="rob-summary-table"><thead><tr><th style="text-align:left">Study</th>' + headers + '</tr></thead><tbody>' + rows + '</tbody></table>';
   }
@@ -3467,7 +3507,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const extractor = document.getElementById('extractorOverlay');
       if (extractor && extractor.style.display !== 'none') { closeExtractorModal(); return; }
       const rob = document.getElementById('robEntryPanel');
-      if (rob && rob.classList.contains('active')) { closeRoBEntry(); return; }
+      if (rob && rob.classList.contains('visible')) { closeRoBEntry(); return; }
       const help = document.getElementById('helpPanel');
       if (help && help.classList.contains('visible')) { toggleHelp(); return; }
     }
@@ -3728,6 +3768,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
   function switchProject(id) {
     currentProjectId = id;
     safeSetStorage('metaSprintNMA_state', { phase: currentPhase, projectId: currentProjectId });
+    // Clear stale analysis caches from previous project
+    mlTrialCache.clear();
+    window._lastNMAResult = null;
+    window._lastSensitivityBattery = null;
+    window._lastCinemaResult = null;
+    window._lastComponentNMAResult = null;
+    if (typeof _alBurhanAnalysisCache !== 'undefined' && _alBurhanAnalysisCache instanceof Map) _alBurhanAnalysisCache.clear();
     switchPhase(currentPhase);
     showToast('Switched project', 'info');
   }
@@ -3995,10 +4042,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
     return added;
   }
 
+  let _loadingUniverse = false;
   async function loadSelectedUniverse() {
+    if (_loadingUniverse) return;
+    _loadingUniverse = true;
     const select = document.getElementById('subcatSelect');
     const val = select.value;
-    if (!val) { showToast('Select a subspecialty first', 'warning'); return; }
+    if (!val) { showToast('Select a subspecialty first', 'warning'); _loadingUniverse = false; return; }
 
     const statusEl = document.getElementById('universeStatus');
     const panel = document.getElementById('universePanel');
@@ -4077,6 +4127,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     } finally {
       select.disabled = false;
       hintEl.textContent = 'Switch subspecialty anytime';
+      _loadingUniverse = false;
     }
   }
 
@@ -4579,6 +4630,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           if (_cardioRCTMode) enrichReferenceForCardioScreen(rec);
           store.put(rec);
         }
+        await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
       } else {
         for (const rec of records) {
           rec.importedAt = new Date().toISOString();
@@ -4622,6 +4674,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           if (_cardioRCTMode) enrichReferenceForCardioScreen(rec);
           store.put(rec);
         }
+        await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
       } else {
         for (const rec of records) {
           rec.importedAt = new Date().toISOString();
@@ -4664,16 +4717,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
   let _refScrollListenerAttached = false;
 
   function _renderSingleRefItem(r) {
+    var validDecisions = ['include','exclude','duplicate','maybe'];
+    var safeDecision = (r.decision && validDecisions.indexOf(r.decision) >= 0) ? r.decision : '';
     return '<div class="ref-item' + (r.id === selectedRefId ? ' selected' : '') +
-      (r.decision ? ' decision-' + r.decision : '') + '"' +
-      ' data-id="' + r.id + '"' +
+      (safeDecision ? ' decision-' + safeDecision : '') + '"' +
+      ' data-id="' + escapeHtml(r.id) + '"' +
       ' tabindex="0" role="option" aria-selected="' + (r.id === selectedRefId) + '"' +
-      ' onclick="selectReference(\'' + r.id + '\')"' +
-      ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectReference(\'' + r.id + '\')}">' +
+      ' onclick="selectReference(\'' + escapeHtml(r.id) + '\')"' +
+      ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectReference(\'' + escapeHtml(r.id) + '\')}">' +
       '<div class="ref-title">' + escapeHtml((r.title || 'Untitled').slice(0, 120)) + '</div>' +
       '<div class="ref-meta">' + escapeHtml((r.authors || '').split(';')[0] || '') +
         (r.year ? ' (' + escapeHtml(r.year) + ')' : '') + '</div>' +
-      (r.decision ? '<span class="badge badge-' + r.decision + '">' + r.decision + (r.autoScreened ? ' (auto)' : '') + '</span>' : '') +
+      (safeDecision ? '<span class="badge badge-' + safeDecision + '">' + escapeHtml(safeDecision) + (r.autoScreened ? ' (auto)' : '') + '</span>' : '') +
       (autoScreenScores[r.id] && !r.decision ?
         '<span class="autoscreen-verdict ' + autoScreenScores[r.id].verdict + '">' +
           (autoScreenScores[r.id].verdict === 'auto-include' ? 'INCLUDE' :
@@ -4845,7 +4900,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       prevSelected.classList.remove('selected');
       prevSelected.setAttribute('aria-selected', 'false');
     }
-    var newSelected = listEl.querySelector('.ref-item[data-id="' + id + '"]');
+    var newSelected = Array.from(listEl.querySelectorAll('.ref-item')).find(function(el) { return el.dataset.id === id; });
     if (newSelected) {
       newSelected.classList.add('selected');
       newSelected.setAttribute('aria-selected', 'true');
@@ -5947,8 +6002,20 @@ body.dark-mode .input-error { background: #451a1a !important; }
     renderAutoScreenQueueStats(_lastQueueCompression);
     resultsDiv.style.display = 'block';
 
-    // Batch persist enriched refs
-    for (const ref of refs) await idbPut('references', ref);
+    // Batch persist enriched refs (single transaction for performance)
+    if (_idbAvailable && db) {
+      try {
+        const tx = db.transaction('references', 'readwrite');
+        const store = tx.objectStore('references');
+        for (const ref of refs) store.put(ref);
+        await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
+      } catch(batchErr) {
+        msaLog('warn', 'screener', 'Batch IDB write failed, falling back to sequential:', batchErr.message);
+        for (const ref of refs) await idbPut('references', ref);
+      }
+    } else {
+      for (const ref of refs) await idbPut('references', ref);
+    }
 
     // Re-render list with auto-screen scores
     await renderReferenceList();
@@ -6064,8 +6131,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const confPct = ((s.confidence ?? 0) * 100).toFixed(0);
     const confColor = s.confidence >= 0.7 ? '#22c55e' : s.confidence >= 0.4 ? '#eab308' : '#ef4444';
     html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">' +
-      '<span class="autoscreen-verdict ' + s.verdict + '" style="font-size:1rem;font-weight:700">' +
-        s.verdict.replace(/-/g, ' ').toUpperCase() + '</span>' +
+      '<span class="autoscreen-verdict ' + escapeHtml(s.verdict) + '" style="font-size:1rem;font-weight:700">' +
+        escapeHtml(s.verdict.replace(/-/g, ' ')).toUpperCase() + '</span>' +
       '<div style="flex:1;background:#e5e7eb;height:8px;border-radius:4px;overflow:hidden">' +
         '<div style="width:' + confPct + '%;background:' + confColor + ';height:100%;border-radius:4px"></div></div>' +
       '<span style="font-size:0.8rem;font-weight:600">' + confPct + '% confidence</span>' +
@@ -6615,6 +6682,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           store.put(ref);
         }
       }
+      await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
     } else {
       for (const d of dupes) {
         const ref = allReferences.find(r => r.id === d.id);
@@ -7075,7 +7143,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
       nArm2: data.nArm2 ?? null,
       pValue: data.pValue ?? null,
       subgroup: data.subgroup || '',
-      rob: { d1: '', d2: '', d3: '', d4: '', d5: '', overall: '' }
+      rob: { d1: '', d2: '', d3: '', d4: '', d5: '', overall: '' },
+      extractionSource: data.extractionSource || 'manual',
+      extractionEvidence: data.extractionEvidence || null
     };
     // Auto-compute CI from p-value if CI is missing
     if (study.effectEstimate != null && study.lowerCI == null && study.upperCI == null && study.pValue != null) {
@@ -7202,6 +7272,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           '<th scope="col" title="Total in Treatment 2 arm">Total T2</th>' +
           '<th scope="col">Type</th>' +
           '<th scope="col">Subgroup</th>' +
+          '<th scope="col">Source</th>' +
           '<th scope="col">Notes</th><th scope="col"></th>';
       } else if (isContinuous) {
         head.innerHTML = commonHead +
@@ -7213,6 +7284,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           '<th scope="col" title="N in Treatment 2 arm">N T2</th>' +
           '<th scope="col">Type</th>' +
           '<th scope="col">Subgroup</th>' +
+          '<th scope="col">Source</th>' +
           '<th scope="col">Notes</th><th scope="col"></th>';
       } else {
         head.innerHTML = commonHead +
@@ -7224,6 +7296,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           '<th scope="col" title="Standard error">SE</th>' +
           '<th scope="col">Type</th>' +
           '<th scope="col">Subgroup</th>' +
+          '<th scope="col">Source</th>' +
           '<th scope="col">Notes</th><th scope="col"></th>';
       }
     }
@@ -7244,17 +7317,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
         '<td><input type="text" value="' + escapeHtml(s.treatment2 || '') + '" maxlength="120" aria-label="Treatment 2" data-field="treatment2" style="width:100px"></td>';
     }
     function renderTailCells(s) {
+      var srcClass = (s.extractionSource || 'manual');
       return '<td><select aria-label="Effect type" data-field="effectType">' +
           VALID_EFFECT_TYPES.map(t => '<option value="' + t + '"' + (s.effectType === t ? ' selected' : '') + '>' + t + '</option>').join('') +
         '</select></td>' +
         '<td><input type="text" value="' + escapeHtml(s.subgroup || '') + '" maxlength="100" aria-label="Subgroup" data-field="subgroup" style="width:80px"></td>' +
+        '<td><span class="source-badge ' + srcClass + '">' + escapeHtml(srcClass) + '</span></td>' +
         '<td><input type="text" value="' + escapeHtml(s.notes) + '" maxlength="500" aria-label="Notes" data-field="notes"></td>' +
         '<td><button class="btn-sm btn-danger" aria-label="Delete study" data-action="delete">X</button></td>';
     }
     // Render table body — NMA modes
     if (is2x2) {
       body.innerHTML = extractedStudies.map(s =>
-        '<tr data-study-id="' + s.id + '">' + renderCommonCells(s) +
+        '<tr data-study-id="' + escapeHtml(s.id) + '">' + renderCommonCells(s) +
           '<td><input type="number" min="0" value="' + (s.eventsInt ?? '') + '" aria-label="Events T1" data-field="eventsInt" style="width:60px"></td>' +
           '<td><input type="number" min="0" value="' + (s.totalInt ?? '') + '" aria-label="Total T1" data-field="totalInt" style="width:60px"></td>' +
           '<td><input type="number" min="0" value="' + (s.eventsCtrl ?? '') + '" aria-label="Events T2" data-field="eventsCtrl" style="width:60px"></td>' +
@@ -7263,7 +7338,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       ).join('');
     } else if (isContinuous) {
       body.innerHTML = extractedStudies.map(s =>
-        '<tr data-study-id="' + s.id + '">' + renderCommonCells(s) +
+        '<tr data-study-id="' + escapeHtml(s.id) + '">' + renderCommonCells(s) +
           '<td><input type="number" step="any" value="' + (s.mean1 ?? '') + '" aria-label="Mean T1" data-field="mean1" style="width:65px"></td>' +
           '<td><input type="number" step="any" min="0" value="' + (s.sd1 ?? '') + '" aria-label="SD T1" data-field="sd1" style="width:60px"></td>' +
           '<td><input type="number" min="1" value="' + (s.nArm1 ?? '') + '" aria-label="N T1" data-field="nArm1" style="width:55px"></td>' +
@@ -7274,7 +7349,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       ).join('');
     } else {
       body.innerHTML = extractedStudies.map(s =>
-        '<tr data-study-id="' + s.id + '">' + renderCommonCells(s) +
+        '<tr data-study-id="' + escapeHtml(s.id) + '">' + renderCommonCells(s) +
           '<td><input type="number" min="0" value="' + (s.n1 ?? '') + '" aria-label="N1" data-field="n1" style="width:60px"></td>' +
           '<td><input type="number" min="0" value="' + (s.n2 ?? '') + '" aria-label="N2" data-field="n2" style="width:60px"></td>' +
           '<td><input type="number" step="any" value="' + (s.effectEstimate ?? '') + '" aria-label="Effect" data-field="effectEstimate" style="width:70px"></td>' +
@@ -7668,7 +7743,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
             if (bundle.settings.pscoreDirection) { var elA = document.getElementById('pscoreDirectionSelect'); if (elA) elA.value = bundle.settings.pscoreDirection; }
             if (bundle.settings.cinemaThreshold) { var elB = document.getElementById('cinemaThreshold'); if (elB) elB.value = bundle.settings.cinemaThreshold; }
             if (bundle.settings.robSumRule) { var elC = document.getElementById('robSumRule'); if (elC) elC.value = bundle.settings.robSumRule; }
-            if (bundle.settings.reference) { var elD = document.getElementById('nmaRefSelect'); if (elD) { var opt = elD.querySelector('option[value="' + bundle.settings.reference + '"]'); if (opt) elD.value = bundle.settings.reference; } }
+            if (bundle.settings.reference) { var elD = document.getElementById('nmaRefSelect'); if (elD) { var opt = Array.from(elD.options).find(function(o) { return o.value === bundle.settings.reference; }); if (opt) elD.value = bundle.settings.reference; } }
           }
           showToast('Imported ' + bundle.studies.length + ' studies from JSON', 'success');
         } catch (err) {
@@ -7957,7 +8032,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         // Derive SE from CI on log scale
         const lo = s.lowerCI, hi = s.upperCI;
         if (lo != null && hi != null && lo > 0 && hi > 0) {
-          const logSe = (Math.log(hi) - Math.log(lo)) / (2 * normalQuantile(1 - (1 - confLvl) / 2));
+          const logSe = (Math.log(hi) - Math.log(lo)) / (2 * normalQuantile(0.975));
           return logSe.toFixed(6);
         }
         return 'NA';
@@ -7970,7 +8045,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         if (s.se != null && isFinite(s.se) && s.se > 0) return s.se.toFixed(6);
         const lo = s.lowerCI, hi = s.upperCI;
         if (lo != null && hi != null) {
-          const se = (hi - lo) / (2 * normalQuantile(1 - (1 - confLvl) / 2));
+          const se = (hi - lo) / (2 * normalQuantile(0.975));
           return se.toFixed(6);
         }
         return 'NA';
@@ -8325,21 +8400,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // --- Predictive probability of null/harmful effect in a new setting ---
   // P(future effect crosses null) per BMC Med Res Methodol 2025
   // Returns probability that a future study would show null or opposite-direction effect
-  function proportionBenefit(muRE, tau2, seRE, isRatio) {
-    const threshold = isRatio ? 0 : 0;  // log(1) = 0 for ratios, 0 for MD
+  // Returns P(future effect crosses null) — probability the true effect in a new study
+  // is on the opposite side of the null from the pooled estimate.
+  // Always returns the "reversal" probability regardless of effect direction.
+  function proportionCrossingNull(muRE, tau2, seRE, isRatio) {
+    const threshold = 0;  // log(1) = 0 for ratios, 0 for MD
     const piSD = Math.sqrt(tau2 + seRE * seRE);
-    if (piSD <= 0) return muRE < threshold ? 0 : (muRE > threshold ? 1 : 0.5);
-    // Future Y ~ N(muRE, piSD^2)
-    // For protective effects (muRE < 0): P(null/harm) = P(Y >= 0) = 1 - Phi((0 - muRE)/piSD)
-    // For harmful effects (muRE > 0): P(null/harm) = P(Y <= 0) = Phi((0 - muRE)/piSD)
-    if (muRE <= 0) {
-      // Protective: P(future >= 0) = P(null/harm) = 1 - Phi((0-mu)/sd)
-      return 1 - normalCDF((threshold - muRE) / piSD);
-    } else {
-      // Harmful: P(future <= 0) = P(reversal to benefit) = Phi((0-mu)/sd)
-      return normalCDF((threshold - muRE) / piSD);
-    }
+    if (piSD <= 0) return muRE === threshold ? 0.5 : 0;
+    // P(Y crosses null) = Phi(-|mu|/piSD) — symmetric around null
+    return normalCDF(-Math.abs(muRE) / piSD);
   }
+  // Backwards-compatible alias
+  var proportionBenefit = proportionCrossingNull;
 
   // --- PET-PEESE bias-adjusted effect estimation ---
   // Stanley & Doucouliagos; Bartos et al. 2022
@@ -8838,7 +8910,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const ciHi = isRatio ? Math.exp(hi) : hi;
     let ePoint;
     if (effectType === 'SMD' || effectType === 'MD') {
-      ePoint = eValueRR(Math.sqrt(Math.exp(Math.PI / Math.sqrt(3) * pe)));
+      // VanderWeele & Mathur 2019: SMD -> approx RR = exp(d * pi/sqrt(3)), no extra sqrt
+      ePoint = eValueRR(Math.exp(Math.PI / Math.sqrt(3) * Math.abs(pe)));
     } else {
       ePoint = effectType === 'OR' ? eValueRR(Math.sqrt(pe)) : eValueRR(pe);
     }
@@ -8848,9 +8921,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
     let eCi = null;
     if (ciExcludesNull) {
       if (effectType === 'SMD' || effectType === 'MD') {
-        eCi = eValueRR(Math.sqrt(Math.exp(Math.PI / Math.sqrt(3) * closerBound)));
+        eCi = eValueRR(Math.exp(Math.PI / Math.sqrt(3) * Math.abs(closerBound)));
       } else if (effectType === 'OR') {
-        eCi = eValueRR(Math.sqrt(closerBound));
+        eCi = closerBound > 0 ? eValueRR(Math.sqrt(closerBound)) : null;
       } else {
         eCi = eValueRR(closerBound);
       }
@@ -8998,15 +9071,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
     if (!nmaResult || !nmaResult.edges || !studies) return null;
     moderatorType = moderatorType || 'year';
     const confLevel = nmaResult.confLevel ?? 0.95;
-    const zCritCI = normalQuantile(1 - (1 - confLevel) / 2);
+    const zCritStudyCI = normalQuantile(0.975);  // Studies report 95% CIs by convention
 
     // Get moderator value for each study
     function getModeratorValue(study) {
       if (moderatorType === 'year') return parseYearFromAuthorYear(study.authorYear || study.study);
       if (moderatorType === 'sampleSize') return (study.nTotal ?? ((study.n1 ?? 0) + (study.n2 ?? 0))) || null;
       if (moderatorType === 'precision') {
+        const _isR = nmaResult.isRatio ?? false;
         const se = study.se ?? (study.lowerCI != null && study.upperCI != null
-          ? (study.upperCI - study.lowerCI) / (2 * zCritCI) : null);
+          ? (_isR
+            ? (Math.log(study.upperCI) - Math.log(study.lowerCI)) / (2 * zCritStudyCI)
+            : (study.upperCI - study.lowerCI) / (2 * zCritStudyCI))
+          : null);
         return se != null && se > 0 ? 1 / (se * se) : null;
       }
       return null;
@@ -9021,10 +9098,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const mod = getModeratorValue(s);
       if (mod == null || !isFinite(mod)) continue;
       const se = s.se ?? (s.lowerCI != null && s.upperCI != null
-        ? (s.upperCI - s.lowerCI) / (2 * zCritCI) : null);
+        ? (isRatio
+          ? (Math.log(s.upperCI) - Math.log(s.lowerCI)) / (2 * zCritStudyCI)
+          : (s.upperCI - s.lowerCI) / (2 * zCritStudyCI))
+        : null);
       if (!se || se <= 0) continue;
       const key = t1 < t2 ? t1 + '||' + t2 : t2 + '||' + t1;
-      const sign = t1 < t2 ? 1 : -1;
+      const sign = t1 < t2 ? -1 : 1;  // Match NMA engine: d[b]-d[a] where a<b alphabetically
       // For ratio measures: work on log scale (negation = reciprocal on natural scale)
       const yi = isRatio ? Math.log(s.effectEstimate) * sign : s.effectEstimate * sign;
       if (!isFinite(yi)) continue;
@@ -9257,8 +9337,12 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // 5 downgrade domains + large effect upgrade (GRADEpro 2025)
   function computeGRADE(pooledResult, studyData) {
     if (!pooledResult) return null;
-    let certainty = 4;  // RCTs start HIGH
+    // Balshem 2011: RCTs start HIGH (4), observational studies start LOW (2)
+    const studyDesign = (document.getElementById('protStudyType')?.value || 'rct').toLowerCase();
+    const hasObservational = studyDesign.includes('observ') || studyDesign.includes('cohort') || studyDesign.includes('case');
+    let certainty = hasObservational ? 2 : 4;
     const domains = {};
+    domains.startingLevel = hasObservational ? 'LOW (observational)' : 'HIGH (RCTs)';
     const isRatio = pooledResult.isRatio;
     const i2 = pooledResult.I2 ?? 0;
     const piLo = pooledResult.piLo;
@@ -9303,7 +9387,24 @@ body.dark-mode .input-error { background: #451a1a !important; }
       ? (pooledResult.pooledLo < 1 && pooledResult.pooledHi > 1)
       : (pooledResult.pooledLo < 0 && pooledResult.pooledHi > 0);
     const totalN = studyData ? studyData.reduce((s, d) => s + (d.nTotal ?? d.enrollment ?? 0), 0) : 0;
-    const oisMet = totalN >= 400;  // Simplified OIS threshold
+    // Dynamic OIS: sample size a single trial would need (confLevel-aware, beta=0.20)
+    const _confLevelOIS = pooledResult.confLevel ?? 0.95;
+    const _zAlphaOIS = normalQuantile(1 - (1 - _confLevelOIS) / 2);
+    const _zOIS = _zAlphaOIS + 0.8416;  // z_alpha/2 + z_beta
+    let oisTarget = 400;  // fallback
+    if (pooledResult.pooled != null) {
+      if (isRatio) {
+        const logEff = Math.abs(Math.log(pooledResult.pooled));
+        if (logEff > 0.01) oisTarget = Math.ceil(4 * _zOIS * _zOIS / (logEff * logEff));
+      } else if (pooledResult.pooled !== 0 && pooledResult.studyResults && pooledResult.studyResults.length > 0) {
+        // Use median study-level SE as SD proxy (more robust than seRE * sqrt(k))
+        const seis = pooledResult.studyResults.map(function(d) { return d.sei; }).sort(function(a,b) { return a - b; });
+        const sdPool = seis[Math.floor(seis.length / 2)];
+        oisTarget = Math.ceil(4 * _zOIS * _zOIS * sdPool * sdPool / (pooledResult.pooled * pooledResult.pooled));
+      }
+    }
+    oisTarget = Math.max(60, Math.min(oisTarget, 50000));  // sanity bounds
+    const oisMet = totalN >= oisTarget;
     if (!oisMet && ciCrossesNull) domains.imprecision = -2;
     else if (!oisMet || ciCrossesNull) domains.imprecision = -1;
     else domains.imprecision = 0;
@@ -9323,14 +9424,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
     domains.indirectness = 0;
     certainty += domains.indirectness;
 
-    // Upgrade: large effect (ratio measures per GRADE handbook; applies at any certainty level)
-    if (pooledResult.pooled != null && isRatio) {
-      const effectMag = Math.abs(Math.log(pooledResult.pooled));
-      if (effectMag > Math.log(5)) { domains.largeEffect = 2; certainty += 2; }
-      else if (effectMag > Math.log(2)) { domains.largeEffect = 1; certainty += 1; }
-      else domains.largeEffect = 0;
-    } else {
-      domains.largeEffect = 0;
+    // Upgrade: large effect (GRADE handbook; only when RoB is not very serious)
+    domains.largeEffect = 0;
+    if (pooledResult.pooled != null && domains.riskOfBias >= -1) {
+      if (isRatio) {
+        const effectMag = Math.abs(Math.log(pooledResult.pooled));
+        if (effectMag > Math.log(5)) { domains.largeEffect = 2; certainty += 2; }
+        else if (effectMag > Math.log(2)) { domains.largeEffect = 1; certainty += 1; }
+      } else {
+        // SMD/MD: Schunemann 2022 — |SMD| > 1.2 = +2, > 0.8 = +1
+        const smdMag = Math.abs(pooledResult.pooled);
+        if (smdMag > 1.2) { domains.largeEffect = 2; certainty += 2; }
+        else if (smdMag > 0.8) { domains.largeEffect = 1; certainty += 1; }
+      }
     }
 
     certainty = Math.max(1, Math.min(4, certainty));
@@ -9347,18 +9453,30 @@ body.dark-mode .input-error { background: #451a1a !important; }
     let cert = baseGrade.certainty;
 
     // 6. Intransitivity — population/design similarity across comparisons
-    // Auto-flag if treatment classes span very different study designs
+    // Proxy check: analysis population diversity + follow-up duration spread (Salanti 2012, Cipriani 2013)
+    // NOTE: This is a partial/proxy assessment. Full transitivity requires manual review of
+    // population characteristics, outcome definitions, co-interventions, and follow-up durations.
     d.intransitivity = 0;
+    d.intransitivityNote = 'partial proxy';
     if (nmaResult.edges) {
       const designs = new Set();
+      const followUps = [];
       for (const e of nmaResult.edges) {
         for (const s of e.studies) {
           const pop = (s.analysisPopulation || '').toLowerCase().trim();
           if (pop) designs.add(pop);
+          const fu = parseFloat(s.followUpWeeks || s.followUp || 0);
+          if (fu > 0) followUps.push(fu);
         }
       }
-      // If >3 different populations, flag concern
+      // Flag concern if many different populations
       if (designs.size > 3) { d.intransitivity = -1; cert -= 1; }
+      // Also flag if follow-up durations vary widely (CV > 0.5 among edges)
+      else if (followUps.length >= 4) {
+        const fuMean = followUps.reduce((a, b) => a + b, 0) / followUps.length;
+        const fuSD = Math.sqrt(followUps.reduce((a, v) => a + (v - fuMean) ** 2, 0) / followUps.length);
+        if (fuMean > 0 && fuSD / fuMean > 0.5) { d.intransitivity = -1; cert -= 1; }
+      }
     }
 
     // 7. Incoherence — from node-splitting + global inconsistency
@@ -9402,9 +9520,12 @@ body.dark-mode .input-error { background: #451a1a !important; }
       // Sackett formula: EER = CER*OR / (1 - CER + CER*OR)
       const eer = (cer * pooledEffect) / (1 - cer + cer * pooledEffect);
       arr = cer - eer;
+    } else if (et === 'HR') {
+      // Altman & Andersen 1999: EER = 1 - (1-CER)^HR (exponential formula)
+      const eer = 1 - Math.pow(1 - cer, pooledEffect);
+      arr = cer - eer;
     } else {
-      // RR / HR approximation: ARR = CER * (1 - RR)
-      // For HR with low event rates, this is a reasonable approximation
+      // RR: ARR = CER * (1 - RR)
       arr = cer * (1 - pooledEffect);
     }
     if (Math.abs(arr) < 1e-10) return null;
@@ -9789,9 +9910,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const alpha = 1 - confLevel;
     const tCrit = tQuantile(1 - alpha / 2, df);
 
-    // HKSJ q-factor: variance inflation from residual heterogeneity
-    const Qtotal = nmaResult.Qtotal ?? 0;
-    const qFactor = Math.sqrt(Math.max(1, Qtotal / df));
+    // HKSJ q-factor: use random-effects Q (Rucker 2012), not fixed-effect Qtotal
+    const Q_RE = nmaResult.Q_RE ?? 0;  // Do NOT fallback to Qtotal (overestimates qFactor)
+    const qFactor = Math.sqrt(Math.max(1, Q_RE / df));
 
     // Rebuild league table with q-inflated SEs and t-based CIs
     const newLeague = nmaResult.leagueTable.map(entry => {
@@ -9904,25 +10025,26 @@ body.dark-mode .input-error { background: #451a1a !important; }
     if (!result || result.k < 3) return null;
     const { studyResults } = result;
     const n = studyResults.length;
-    // Weighted linear regression: yi/sei = a + b*(1/sei)
-    // Standard form: z_i = a + b*precision_i
-    const xs = studyResults.map(d => 1 / d.sei); // precision
-    const ys = studyResults.map(d => d.yi / d.sei); // standardized effect
-    const sumX = xs.reduce((a, v) => a + v, 0);
-    const sumY = ys.reduce((a, v) => a + v, 0);
-    const sumXY = xs.reduce((a, v, i) => a + v * ys[i], 0);
-    const sumX2 = xs.reduce((a, v) => a + v * v, 0);
-    // Guard: denominator zero when all precisions are equal (degenerate regression)
-    const ssDenom = n * sumX2 - sumX * sumX;
+    // Weighted linear regression (Sterne-Egger 2005, as in R metafor::regtest):
+    // yi = a + b*sei, weighted by 1/sei^2 (inverse variance)
+    const ws = studyResults.map(d => 1 / (d.sei * d.sei));
+    const xs = studyResults.map(d => d.sei);
+    const ys = studyResults.map(d => d.yi);
+    const sumW = ws.reduce((a, v) => a + v, 0);
+    if (sumW <= 0) return null;
+    const sumWx = ws.reduce((a, v, i) => a + v * xs[i], 0);
+    const sumWy = ws.reduce((a, v, i) => a + v * ys[i], 0);
+    const sumWxx = ws.reduce((a, v, i) => a + v * xs[i] * xs[i], 0);
+    const sumWxy = ws.reduce((a, v, i) => a + v * xs[i] * ys[i], 0);
+    const ssDenom = sumW * sumWxx - sumWx * sumWx;
     if (Math.abs(ssDenom) < 1e-15) return null;
-    const slope = (n * sumXY - sumX * sumY) / ssDenom;
-    const intercept = (sumY - slope * sumX) / n;
-    // SE of intercept (guard: mse can be tiny-negative from float precision when k=3)
-    const residuals = ys.map((y, i) => y - intercept - slope * xs[i]);
-    const mse = Math.max(0, residuals.reduce((a, r) => a + r * r, 0) / (n - 2));
-    const seIntercept = Math.sqrt(mse * sumX2 / ssDenom);
+    const slope = (sumW * sumWxy - sumWx * sumWy) / ssDenom;
+    const intercept = (sumWy - slope * sumWx) / sumW;
+    // Weighted residual MSE
+    const wResidSS = ws.reduce((a, v, i) => a + v * Math.pow(ys[i] - intercept - slope * xs[i], 2), 0);
+    const mse = Math.max(0, wResidSS / (n - 2));
+    const seIntercept = Math.sqrt(mse / sumW * (sumWxx / (sumWxx - sumWx * sumWx / sumW)));
     if (!isFinite(seIntercept) || seIntercept <= 0) return null;
-    // t-test for intercept != 0
     const tStat = intercept / seIntercept;
     const pValue = 2 * (1 - tCDFfn(Math.abs(tStat), n - 2));
     return { intercept, slope, seIntercept, tStat, pValue, df: n - 2, test: 'Egger' };
@@ -10393,6 +10515,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
     // Invert V to get W
     const Wnew = matInvert(V);
+    if (!Wnew) { buildBlockDiagonalW._fallbackUsed = true; return W; }
     // Verify positive-definiteness: all diagonal elements should be positive
     let valid = true;
     for (let e = 0; e < nE; e++) {
@@ -10607,7 +10730,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       Q_within, df_within, Q_inconsistency, df_inconsistency, pInconsistency,
       Q_total_full, df_total_full, totalStudies,
       leagueTable, pscores, treatments, refTreatment, refIdx,
-      edges, nT, nE, components, hatMatrix: H_RE, zCrit, confLevel,
+      edges, nT, nE, components, hatMatrix: H_RE, hatMatrixFE: H, zCrit, confLevel,
       network, isRatio: network.isRatio, multiArmCount: multiArmMap.size,
       multiArmFallback: buildBlockDiagonalW._fallbackUsed,
       tau2Method, B, W_RE: WRE, pscoreSign
@@ -10727,9 +10850,12 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
     // Prior type and scale from UI
     const priorType = opts.priorType ?? (document.getElementById('bayesPriorType')?.value || 'halfnormal');
-    const priorScale = opts.priorScale ?? (parseFloat(document.getElementById('bayesPriorScale')?.value) || 1);
-    const priorMu = opts.priorMu ?? (parseFloat(document.getElementById('bayesPriorMu')?.value) || -2.34);
-    const priorSigma = opts.priorSigma ?? (parseFloat(document.getElementById('bayesPriorSigma')?.value) || 1.62);
+    const _rawScale = parseFloat(document.getElementById('bayesPriorScale')?.value);
+    const priorScale = opts.priorScale ?? (isFinite(_rawScale) ? _rawScale : 1);
+    const _rawMu = parseFloat(document.getElementById('bayesPriorMu')?.value);
+    const priorMu = opts.priorMu ?? (isFinite(_rawMu) ? _rawMu : -2.34);
+    const _rawSigma = parseFloat(document.getElementById('bayesPriorSigma')?.value);
+    const priorSigma = opts.priorSigma ?? (isFinite(_rawSigma) ? _rawSigma : 1.62);
     // Resolve informative prior label for results display
     const presetKey = document.getElementById('bayesPriorPreset')?.value || '';
     const priorInfo = TURNER_RHODES_PRIORS[presetKey] || null;
@@ -10950,7 +11076,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       confLevel, network, pscores: sucra, isRatio: network.isRatio,
       DIC, DBar, pD, DThetaBar, pDWarning,
       priorType, priorScale, priorMu, priorSigma, priorInfo,
-      _chainSamples: allSamples  // stored for trace/density diagnostic plots
+      _chainSamples: allSamples  // stored for trace/density diagnostic plots — auto-cleared after 5 min
     };
   }
 
@@ -11025,8 +11151,15 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const pValue = 2 * (1 - normalCDF(Math.abs(z)));
 
       // Network estimate from full NMA (if available)
-      let networkEffect = (directEffect * (1/(directSE*directSE)) + indirectEffect * (1/(indirectSE*indirectSE))) / (1/(directSE*directSE) + 1/(indirectSE*indirectSE));
-      let networkSE = 1 / Math.sqrt(1/(directSE*directSE) + 1/(indirectSE*indirectSE));
+      let networkEffect, networkSE;
+      if (directSE > 0 && indirectSE > 0) {
+        const wD = 1 / (directSE * directSE), wI = 1 / (indirectSE * indirectSE);
+        networkEffect = (directEffect * wD + indirectEffect * wI) / (wD + wI);
+        networkSE = 1 / Math.sqrt(wD + wI);
+      } else {
+        networkEffect = directSE > 0 ? directEffect : indirectEffect;
+        networkSE = directSE > 0 ? directSE : (indirectSE > 0 ? indirectSE : 1);
+      }
       if (fullNMAResult && fullNMAResult.d && fullNMAResult.V) {
         networkEffect = fullNMAResult.d[j] - fullNMAResult.d[i];
         const nVar = fullNMAResult.V[i][i] + fullNMAResult.V[j][j] - 2 * fullNMAResult.V[i][j];
@@ -11087,7 +11220,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
       if (directSE <= 0) continue;
       const diff = directEffect - networkEffect;
-      const w = 1 / (directSE * directSE + (nmaResult.tau2 ?? 0));
+      // Fixed-effect weights for the consistency test (Higgins 2012): excluding tau2
+      // to avoid reducing power to detect inconsistency
+      const w = 1 / (directSE * directSE);
       const contrib = w * diff * diff;
       Q_design += contrib;
       df_design++;
@@ -11413,7 +11548,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         pooledLo: isRatio ? Math.exp(entry.lo) : entry.lo,
         pooledHi: isRatio ? Math.exp(entry.hi) : entry.hi,
         tau2: nmaResult.tau2 ?? 0, I2: nmaResult.I2global ?? 0,
-        k: kComp, isRatio: isRatio
+        k: kComp, isRatio: isRatio, confLevel: confLevel
       };
       const baseGrade = computeGRADE(pooledObj, compStudies.length > 0 ? compStudies : extractedStudies);
       // Enhance with NMA-specific domains
@@ -11578,7 +11713,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const { d, V, tau2, nT, isRatio } = nmaResult;
     if (!d || !V || nT < 2) return null;
     // Seeded PRNG for deterministic rank probabilities
-    const rng = mulberry32(12345);
+    const rng = xoshiro128ss(12345);
     const pscoreSign = nmaResult.pscoreSign ?? (isRatio ? -1 : 1);
 
     // Build covariance matrix V + tau2*I
@@ -11924,7 +12059,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const V = nmaResult.V;
     const tau2 = nmaResult.tau2 ?? (nmaResult.tau2Summary ? nmaResult.tau2Summary.median : 0);
     const zCrit = nmaResult.zCrit ?? normalQuantile(1 - (1 - confLevel) / 2);
-    const isBayesian = !d || !V; // Bayesian results lack d/V arrays
+    const isBayesian = !!(nmaResult.nChains); // Bayesian results have d/V but are posterior-based
     const nT = treatments.length;
     if (nT < 2) return '<p>Need at least 2 treatments for NMA forest plot</p>';
 
@@ -11942,9 +12077,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
         dispEffect = isRatio ? Math.exp(entry.effect) : entry.effect;
         dispLo = isRatio ? Math.exp(entry.lo) : entry.lo;
         dispHi = isRatio ? Math.exp(entry.hi) : entry.hi;
-        // Bayesian has no separate prediction interval — use CI as proxy
-        dispPiLo = dispLo;
-        dispPiHi = dispHi;
+        // Bayesian prediction interval: posterior variance + heterogeneity
+        if (d && V && tau2 > 0) {
+          const dij = d[i] - d[refIdx];
+          const varij = V[i][i] + V[refIdx][refIdx] - 2 * V[i][refIdx];
+          const piSE = Math.sqrt(tau2 + varij);
+          const piLo = dij - zCrit * piSE;
+          const piHi = dij + zCrit * piSE;
+          dispPiLo = isRatio ? Math.exp(piLo) : piLo;
+          dispPiHi = isRatio ? Math.exp(piHi) : piHi;
+        } else {
+          dispPiLo = dispLo;
+          dispPiHi = dispHi;
+        }
       } else {
         const dij = d[i] - d[refIdx]; // effect vs reference (log scale for ratios)
         const varij = V[i][i] + V[refIdx][refIdx] - 2 * V[i][refIdx];
@@ -12234,13 +12379,20 @@ body.dark-mode .input-error { background: #451a1a !important; }
     if (!nmaResult || !nmaResult.edges) return '';
     const { edges, d } = nmaResult;
 
-    // Collect all study-level residuals
+    // Collect all study-level residuals with consistent ordering
+    // Per Chaimani 2013: order comparisons consistently (alphabetical t1 < t2)
     const points = [];
     for (const edge of edges) {
       const networkEffect = d[edge.t2Idx] - d[edge.t1Idx]; // network estimate for this comparison
+      // Enforce consistent direction: alphabetical order for interpretable asymmetry
+      const t1Name = edge.t1, t2Name = edge.t2;
+      const flip = t1Name > t2Name;
       for (const s of edge.studies) {
-        const residual = s.directedEffect - networkEffect;
-        points.push({ residual, se: s.se, invSE: 1 / s.se, label: edge.t1 + ' vs ' + edge.t2 });
+        const dirEff = flip ? -s.directedEffect : s.directedEffect;
+        const netEff = flip ? -networkEffect : networkEffect;
+        const residual = dirEff - netEff;
+        const label = flip ? (t2Name + ' vs ' + t1Name) : (t1Name + ' vs ' + t2Name);
+        points.push({ residual, se: s.se, invSE: 1 / s.se, label });
       }
     }
     if (points.length < 3) return '';
@@ -12345,8 +12497,12 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // ANALYSIS DASHBOARD
   // ============================================================
   let lastAnalysisResult = null;
+  let _analysisRunning = false;
+  let _chainSamplesTimerId = null;
 
   async function runAnalysis() {
+    if (_analysisRunning) return;
+    _analysisRunning = true;
     const _runBtn = document.querySelector('#phase-analyze .btn-success');
     if (_runBtn) { _runBtn.disabled = true; _runBtn.innerHTML = '<span class="spinner"></span> Running...'; }
     try {
@@ -12456,10 +12612,11 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const refSelect = document.getElementById('nmaRefSelect');
     if (refSelect) {
       const currentVal = refSelect.value;
-      refSelect.innerHTML = '<option value="auto">Auto (most connected)</option>';
+      var _refOpts = '<option value="auto">Auto (most connected)</option>';
       for (const t of network.treatments) {
-        refSelect.innerHTML += '<option value="' + escapeHtml(t) + '"' + (t === currentVal ? ' selected' : '') + '>' + escapeHtml(t) + '</option>';
+        _refOpts += '<option value="' + escapeHtml(t) + '"' + (t === currentVal ? ' selected' : '') + '>' + escapeHtml(t) + '</option>';
       }
+      refSelect.innerHTML = _refOpts;
     }
 
     if (network.components.length > 1) {
@@ -12486,7 +12643,11 @@ body.dark-mode .input-error { background: #451a1a !important; }
     let nmaResult;
     if (nmaEngine === 'bayesian') {
       showToast('Running Bayesian NMA (MCMC)... this may take a few seconds.', 'info');
+      if (_chainSamplesTimerId) { clearTimeout(_chainSamplesTimerId); _chainSamplesTimerId = null; }
       nmaResult = runBayesianNMA(network, confLevel);
+      if (nmaResult && nmaResult._chainSamples) {
+        _chainSamplesTimerId = setTimeout(function() { if (lastAnalysisResult && lastAnalysisResult._chainSamples) { lastAnalysisResult._chainSamples = null; msaLog('debug', 'bayesian', 'Chain samples auto-cleared to free memory'); } }, 300000);
+      }
     } else {
       const nmaTau2 = document.getElementById('nmaTau2Method')?.value || 'DL';
       const baseTau2 = nmaTau2 === 'DL-HKSJ' ? 'DL' : nmaTau2;
@@ -12900,6 +13061,26 @@ body.dark-mode .input-error { background: #451a1a !important; }
     document.getElementById('funnelPlotContainer').innerHTML = renderFunnelPlot(result, funnelTF, funnelAsymTest);
     document.getElementById('analysisExport').style.display = 'block';
 
+    // P0-1: Store full analysis data for Insights modules
+    try {
+      var insightsData = {
+        pooledEffect: result.pooled,
+        pooledSE: result.seRE ?? result.seFE,
+        pooledCI: [result.pooledLo, result.pooledHi],
+        I2: result.I2,
+        tau2: result.tau2,
+        effectType: valid[0]?.effectType ?? 'OR',
+        studies: (result.studyResults ?? []).map(function(sr) {
+          return { label: sr.label, yi: sr.yi, sei: sr.sei, effect: sr.yi, wi: sr.wi };
+        }),
+        k: result.k,
+        ciWidth: (result.pooledHi - result.pooledLo),
+        isRatio: result.isRatio,
+        confLevel: confLevel,
+      };
+      analysisSummaryEl.dataset.lastResult = JSON.stringify(insightsData);
+    } catch(e) { msaLog('warn', 'analyze', 'Failed to store Insights data: ' + (e?.message || e)); }
+
     // P3-3: Setup interactive SVG tooltips
     if (nmaResult) setupNMATooltips(nmaResult);
 
@@ -12940,8 +13121,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       if (copasResults && copasResults.length > 0) {
         var copasW = 400, copasH = 200, cPad = 40;
         var origEst = result.muRE ?? result.muFE ?? 0;
-        var copSvg = '<svg viewBox="0 0 ' + copasW + ' ' + copasH + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Copas selection model sensitivity plot" style="max-width:400px;width:100%;font-family:var(--font)">';
-        copSvg += '<text x="' + (copasW / 2) + '" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--text)">Copas Selection Model Sensitivity</text>';
+        var copSvg = '<svg viewBox="0 0 ' + copasW + ' ' + copasH + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Selection-weighted sensitivity analysis (Copas-inspired approximation, not full MLE)" style="max-width:400px;width:100%;font-family:var(--font)">';
+        copSvg += '<text x="' + (copasW / 2) + '" y="16" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--text)">Selection-Weighted Sensitivity Analysis</text>';
         // Axes
         copSvg += '<line x1="' + cPad + '" y1="' + (copasH - cPad) + '" x2="' + (copasW - 10) + '" y2="' + (copasH - cPad) + '" stroke="var(--text)"/>';
         copSvg += '<line x1="' + cPad + '" y1="20" x2="' + cPad + '" y2="' + (copasH - cPad) + '" stroke="var(--text)"/>';
@@ -13062,7 +13243,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var nodeSplitsForGrade = null;
     try { nodeSplitsForGrade = runNodeSplitting(network, confLevel, nmaResult); } catch(e) { msaLog('warn', 'analyze', 'Node-splitting for GRADE failed: ' + (e?.message || e)); }
     if (gradeResult && nmaResult) {
-      gradeResult = computeGRADE_NMA(gradeResult, nmaResult, nodeSplitsForGrade, null);
+      // Use the first edge comparison as default context for NMA indirectness assessment
+      var defaultCompKey = nmaResult.edges && nmaResult.edges.length > 0
+        ? nmaResult.edges[0].t1 + '||' + nmaResult.edges[0].t2 : null;
+      gradeResult = computeGRADE_NMA(gradeResult, nmaResult, nodeSplitsForGrade, defaultCompKey);
     }
     var gradeEl = document.getElementById('gradeContainer');
     var nntEl = document.getElementById('nntContainer');
@@ -13099,7 +13283,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         (d.largeEffect > 0 ? '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px">Large Effect Upgrade</td><td style="padding:4px 8px">' + domainLabel(d.largeEffect) + '</td></tr>' : '') +
         '<tr style="border-bottom:2px solid var(--border);background:var(--bg-card)"><td colspan="2" style="padding:4px 8px;font-weight:600;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.5px">NMA-Specific Extensions (Salanti 2014)</td></tr>' +
         '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px" title="Population/design similarity across direct comparisons forming the network">7. Intransitivity</td><td style="padding:4px 8px">' + domainLabel(d.intransitivity) +
-          ' <span style="opacity:0.6">(population similarity across comparisons)</span></td></tr>' +
+          ' <span style="opacity:0.6">(proxy: population + follow-up diversity' + (d.intransitivityNote ? ' \u2014 ' + escapeHtml(d.intransitivityNote) : '') + ')</span></td></tr>' +
         '<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px" title="Whether a comparison relies solely on indirect evidence (no head-to-head studies)">8. Indirectness (NMA)</td><td style="padding:4px 8px">' +
           (d.indirectnessNMA === -1 ? domainLabel(-1) + ' <span style="opacity:0.6">(indirect evidence only)</span>' : domainLabel(0) + ' <span style="opacity:0.6">(direct evidence available)</span>') + '</td></tr>' +
         '</table>' +
@@ -13213,6 +13397,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       console.warn('Meta-analysis failed:', err);
       showToast('Meta-analysis failed: ' + (err.message || 'Unknown error'), 'danger');
     } finally {
+      _analysisRunning = false;
       if (_runBtn) { _runBtn.disabled = false; _runBtn.textContent = 'Run Network Meta-Analysis'; }
     }
   }
@@ -13538,7 +13723,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     // Compute adjusted pooled estimate with imputed studies
     var adjustedStudies = data.map(function(d) {
       var effect = isRatio ? Math.exp(d.yi) : d.yi;
-      var zCI = normalQuantile((1 + (window._confLevel || 0.95)) / 2);
+      var zCI = normalQuantile(0.975);  // Study CIs at 95% — computeMetaAnalysis back-calculates SE assuming 95%
       return {
         effectEstimate: effect,
         lowerCI: isRatio ? Math.exp(d.yi - zCI * d.sei) : d.yi - zCI * d.sei,
@@ -13604,10 +13789,12 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var isRatio = ['OR', 'RR', 'HR'].includes(valid[0].effectType);
     if (!isRatio) return null; // Only for binary/ratio outcomes
 
-    // Check if pooled result is significant
-    var baseResult = computeMetaAnalysis(valid, 0.95, { hksj: true });
+    // Check if pooled result is significant — use the analysis confLevel
+    var fragConfLevel = confLevel ?? 0.95;
+    var fragAlpha = 1 - fragConfLevel;
+    var baseResult = computeMetaAnalysis(valid, fragConfLevel, { hksj: true });
     if (!baseResult) return null;
-    var isSignificant = baseResult.pValue < 0.05;
+    var isSignificant = baseResult.pValue < fragAlpha;
 
     // Fragility: remove one study at a time, count how many removals flip significance
     var fragility = 0;
@@ -13615,9 +13802,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
     for (var i = 0; i < valid.length; i++) {
       var subset = valid.slice(0, i).concat(valid.slice(i + 1));
       if (subset.length < 1) continue;
-      var r = computeMetaAnalysis(subset, 0.95, { hksj: true });
+      var r = computeMetaAnalysis(subset, fragConfLevel, { hksj: true });
       if (!r) continue;
-      var flipped = isSignificant ? (r.pValue >= 0.05) : (r.pValue < 0.05);
+      var flipped = isSignificant ? (r.pValue >= fragAlpha) : (r.pValue < fragAlpha);
       if (flipped) {
         fragility++;
         if (!fragileStudy) fragileStudy = valid[i].authorYear || ('Study ' + (i + 1));
@@ -14824,11 +15011,622 @@ body.dark-mode .input-error { background: #451a1a !important; }
     });
     renderSearchResultsList();
     showToast('All ' + sourceCount + ' sources searched: ' + searchResultsCache.length + ' unique results', 'success');
+    // Show auto-extract button if we have results
+    var aeRow = document.getElementById('autoExtractRow');
+    if (aeRow && searchResultsCache.length > 0) {
+      var nctCount = searchResultsCache.filter(function(r) { return r.nctId; }).length;
+      var pmidCount = searchResultsCache.filter(function(r) { return r.pmid; }).length;
+      aeRow.style.display = 'block';
+      document.getElementById('autoExtractCount').textContent =
+        nctCount + ' with NCT IDs, ' + pmidCount + ' with PMIDs';
+    }
     } finally {
       _searchAllRunning = false;
       const cb = document.getElementById('cancelSearchBtn');
       if (cb) cb.style.display = 'none';
     }
+  }
+
+  // ============================================================
+  // OA AUTO-EXTRACT ENGINE
+  // ============================================================
+
+  /**
+   * Parse effect sizes from a PubMed structured abstract.
+   * Returns array of { effectType, estimate, lowerCI, upperCI, pValue, sourceSentence, matchSpan }
+   */
+  function parseAbstractEffects(abstractText) {
+    if (!abstractText || typeof abstractText !== 'string') return [];
+    const results = [];
+    const seen = new Set();
+
+    const sentences = abstractText.split(/(?<=[.;])\s+/);
+
+    const patterns = [
+      { type: 'HR', re: /\b(?:HR|hazard\s+ratio)\s*(?:[=:,]|was|of)?\s*(\d+\.?\d*)\s*[,;]?\s*(?:\(?95%?\s*CI\)?|CI)\s*[=:,]?\s*(\d+\.?\d*)\s*[-\u2013to]+\s*(\d+\.?\d*)/gi },
+      { type: 'OR', re: /\b(?:OR|odds\s+ratio)\s*(?:[=:,]|was|of)?\s*(\d+\.?\d*)\s*[,;]?\s*(?:\(?95%?\s*CI\)?|CI)\s*[=:,]?\s*(\d+\.?\d*)\s*[-\u2013to]+\s*(\d+\.?\d*)/gi },
+      { type: 'RR', re: /\b(?:RR|relative\s+risk|risk\s+ratio)\s*(?:[=:,]|was|of)?\s*(\d+\.?\d*)\s*[,;]?\s*(?:\(?95%?\s*CI\)?|CI)\s*[=:,]?\s*(\d+\.?\d*)\s*[-\u2013to]+\s*(\d+\.?\d*)/gi },
+      { type: 'MD', re: /\b(?:mean\s+diff(?:erence)?|MD|difference\s+in\s+means?)\s*(?:[=:,]|was|of)?\s*(-?\d+\.?\d*)\s*[,;]?\s*(?:\(?95%?\s*CI\)?|CI)\s*[=:,]?\s*(-?\d+\.?\d*)\s*[-\u2013to]+\s*(-?\d+\.?\d*)/gi },
+    ];
+
+    const pRe = /[Pp]\s*([=<>])\s*(\d+\.?\d*(?:\s*[x\u00d7]\s*10\s*[-\u2013]\s*\d+)?)/g;
+
+    for (const sent of sentences) {
+      for (const pat of patterns) {
+        pat.re.lastIndex = 0;
+        let m;
+        while ((m = pat.re.exec(sent)) !== null) {
+          const est = parseFloat(m[1]);
+          const lo = parseFloat(m[2]);
+          const hi = parseFloat(m[3]);
+          if (!isFinite(est) || !isFinite(lo) || !isFinite(hi)) continue;
+          if (lo > hi) continue;
+          const key = pat.type + ':' + est + ':' + lo + ':' + hi;
+          if (seen.has(key)) continue;
+          seen.add(key);
+
+          let pValue = null;
+          pRe.lastIndex = 0;
+          const pm = pRe.exec(sent);
+          if (pm) {
+            const pStr = pm[2].replace(/\s*[x\u00d7]\s*10\s*[-\u2013]\s*/, 'e-');
+            pValue = parseFloat(pStr);
+            if (!isFinite(pValue)) pValue = null;
+          }
+
+          results.push({
+            effectType: pat.type,
+            estimate: est,
+            lowerCI: lo,
+            upperCI: hi,
+            pValue: pValue,
+            sourceSentence: sent.trim(),
+            matchSpan: [m.index, m.index + m[0].length]
+          });
+        }
+      }
+    }
+    return results;
+  }
+
+  /**
+   * Fetch and parse CT.gov resultsSection for a given NCT ID.
+   * Returns array of { outcomeTitle, effectType, estimate, lowerCI, upperCI, pValue, arms, fieldPath }
+   */
+  async function extractFromCTGov(nctId) {
+    if (!nctId || !/^NCT\d{8}$/i.test(nctId)) return [];
+    try {
+      const url = 'https://clinicaltrials.gov/api/v2/studies/' + nctId +
+        '?fields=resultsSection,protocolSection.armsInterventionsModule';
+      const resp = await rateLimitedFetch(url, 'ctgov');
+      if (!resp.ok) return [];
+      const study = await resp.json();
+      const results = study.resultsSection;
+      if (!results) return [];
+
+      const extracted = [];
+      const outcomeMods = results.outcomeMeasuresModule?.outcomeMeasures || [];
+      for (let oi = 0; oi < outcomeMods.length; oi++) {
+        const om = outcomeMods[oi];
+        const title = om.title || 'Outcome ' + (oi + 1);
+        const outcomeType = (om.type || '').toUpperCase(); // PRIMARY, SECONDARY, OTHER
+        const analyses = om.analyses || [];
+
+        for (let ai = 0; ai < analyses.length; ai++) {
+          const an = analyses[ai];
+          const paramType = (an.paramType || '').toLowerCase();
+          const paramValue = parseFloat(an.paramValue);
+          if (!isFinite(paramValue)) continue;
+
+          let effectType = null;
+          if (paramType.includes('hazard')) effectType = 'HR';
+          else if (paramType.includes('odds')) effectType = 'OR';
+          else if (paramType.includes('risk ratio') || paramType.includes('relative risk')) effectType = 'RR';
+          else if (paramType.includes('mean diff') || paramType.includes('difference')) effectType = 'MD';
+          else if (paramType.includes('ratio')) effectType = 'OR';
+          if (!effectType) continue;
+
+          const ciLower = parseFloat(an.ciLowerLimit);
+          const ciUpper = parseFloat(an.ciUpperLimit);
+          const pVal = an.pValue != null ? parseFloat(String(an.pValue).replace(/[<>]/g, '')) : null;
+
+          const groupIds = an.groupIds || [];
+          const armGroups = study.protocolSection?.armsInterventionsModule?.armGroups || [];
+          const armLabels = groupIds.map(function(gid) {
+            const idx = parseInt((gid.match(/\d+/) || ['0'])[0], 10);
+            return armGroups[idx]?.label || gid;
+          });
+
+          extracted.push({
+            outcomeTitle: title,
+            effectType: effectType,
+            estimate: paramValue,
+            lowerCI: isFinite(ciLower) ? ciLower : null,
+            upperCI: isFinite(ciUpper) ? ciUpper : null,
+            pValue: isFinite(pVal) ? pVal : null,
+            arms: armLabels,
+            fieldPath: 'resultsSection.outcomeMeasures[' + oi + '].analyses[' + ai + ']',
+            outcomeType: outcomeType,
+            isPrimary: outcomeType === 'PRIMARY'
+          });
+        }
+
+        // Extract group-level measures for continuous outcomes (mean/SD)
+        const groups = om.groups || [];
+        const measures = om.measures || [];
+        for (const measure of measures) {
+          const classes = measure.classes || [];
+          for (const cls of classes) {
+            const cats = cls.categories || [];
+            for (const cat of cats) {
+              const measurements = cat.measurements || [];
+              if (measurements.length >= 2 && measure.paramType === 'Mean') {
+                const m0 = measurements[0], m1 = measurements[1];
+                const val0 = parseFloat(m0.value), val1 = parseFloat(m1.value);
+                const sd0 = parseFloat(m0.spread), sd1 = parseFloat(m1.spread);
+                if (isFinite(val0) && isFinite(val1) && isFinite(sd0) && isFinite(sd1)) {
+                  const n0 = parseInt(m0.numAffected || m0.numAnalyzed, 10) || null;
+                  const n1 = parseInt(m1.numAffected || m1.numAnalyzed, 10) || null;
+                  extracted.push({
+                    outcomeTitle: title + ' (arm-level means)',
+                    effectType: 'MD_RAW',
+                    estimate: null,
+                    lowerCI: null,
+                    upperCI: null,
+                    pValue: null,
+                    arms: [groups[0]?.title || 'Arm 1', groups[1]?.title || 'Arm 2'],
+                    fieldPath: 'resultsSection.outcomeMeasures[' + oi + '].measures',
+                    rawMeans: { mean1: val0, sd1: sd0, n1: n0, mean2: val1, sd2: sd1, n2: n1 },
+                    outcomeType: outcomeType,
+                    isPrimary: outcomeType === 'PRIMARY'
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return extracted;
+    } catch (err) {
+      msaLog('warn', 'autoExtract', 'CT.gov results fetch failed for ' + nctId + ': ' + (err?.message || err));
+      return [];
+    }
+  }
+
+  /**
+   * Fetch structured abstract from PubMed efetch for a given PMID.
+   * Returns { abstract, fullAbstract, title, authors, year, lang, isRetracted }
+   */
+  async function fetchPubMedAbstract(pmid) {
+    if (!pmid) return null;
+    try {
+      const url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=' +
+        encodeURIComponent(pmid) + '&rettype=xml&retmode=text';
+      const resp = await rateLimitedFetch(url, 'pubmed');
+      if (!resp.ok) return null;
+      const xml = await resp.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xml, 'text/xml');
+
+      const abstractParts = doc.querySelectorAll('AbstractText');
+      let abstractText = '';
+      let resultsText = '';
+      for (const part of abstractParts) {
+        const label = part.getAttribute('NlmCategory') || part.getAttribute('Label') || '';
+        const text = part.textContent || '';
+        abstractText += text + ' ';
+        if (label.toUpperCase() === 'RESULTS' || label.toUpperCase() === 'FINDINGS') {
+          resultsText += text + ' ';
+        }
+      }
+      if (!resultsText) resultsText = abstractText;
+
+      const commentsCorrections = doc.querySelectorAll('CommentsCorrections');
+      let isRetracted = false;
+      for (const cc of commentsCorrections) {
+        if ((cc.getAttribute('RefType') || '').toLowerCase().includes('retract')) {
+          isRetracted = true;
+        }
+      }
+
+      const langEl = doc.querySelector('Language');
+      const lang = langEl ? langEl.textContent : 'eng';
+
+      const titleEl = doc.querySelector('ArticleTitle');
+      const yearEl = doc.querySelector('PubDate Year') || doc.querySelector('PubDate MedlineDate');
+      const authorEls = doc.querySelectorAll('Author');
+      const firstAuthor = authorEls.length > 0 ?
+        ((authorEls[0].querySelector('LastName')?.textContent || '') + ' ' +
+         (authorEls[0].querySelector('Initials')?.textContent || '')).trim() : '';
+      const year = yearEl ? (yearEl.textContent || '').slice(0, 4) : '';
+
+      return {
+        abstract: resultsText.trim() || abstractText.trim(),
+        fullAbstract: abstractText.trim(),
+        title: titleEl ? titleEl.textContent : '',
+        authors: firstAuthor,
+        year: year,
+        lang: lang,
+        isRetracted: isRetracted
+      };
+    } catch (err) {
+      msaLog('warn', 'autoExtract', 'PubMed abstract fetch failed for PMID ' + pmid + ': ' + (err?.message || err));
+      return null;
+    }
+  }
+
+  let _autoExtractRunning = false;
+  let _extractionResults = [];
+
+  async function runAutoExtract() {
+    if (_autoExtractRunning) return;
+    if (!searchResultsCache || searchResultsCache.length === 0) {
+      showToast('Run a search first', 'warning');
+      return;
+    }
+    _autoExtractRunning = true;
+    const statusEl = document.getElementById('autoExtractStatus');
+    const btn = document.getElementById('autoExtractBtn');
+    btn.disabled = true;
+    _extractionResults = [];
+
+    try {
+      const trials = [];
+      for (const r of searchResultsCache) {
+        const nctId = (r.nctId || '').toUpperCase();
+        const pmid = r.pmid || '';
+        const title = r.title || '';
+        const authors = r.authors || '';
+        const year = r.year || '';
+        if (nctId || pmid) {
+          trials.push({ nctId, pmid, title, authors, year, doi: r.doi || '' });
+        }
+      }
+
+      if (trials.length === 0) {
+        showToast('No trials with NCT IDs or PMIDs found in search results', 'warning');
+        return;
+      }
+
+      statusEl.textContent = 'Extracting from ' + trials.length + ' trials...';
+      let ctgovCount = 0, pubmedCount = 0, noDataCount = 0;
+
+      for (let i = 0; i < trials.length; i++) {
+        const t = trials[i];
+        statusEl.textContent = 'Processing ' + (i + 1) + '/' + trials.length + ': ' + (t.nctId || 'PMID:' + t.pmid) + '...';
+
+        const trialResult = {
+          nctId: t.nctId,
+          pmid: t.pmid,
+          title: t.title,
+          authorYear: (t.authors.split(/[,;]/)[0] || '').trim() + (t.year ? ' ' + t.year : ''),
+          doi: t.doi,
+          outcomes: [],
+          ctgovRaw: [],
+          pubmedRaw: [],
+          source: 'none'
+        };
+
+        // 1. Try CT.gov results
+        if (t.nctId) {
+          const ctResults = await extractFromCTGov(t.nctId);
+          trialResult.ctgovRaw = ctResults;
+          if (ctResults.length > 0) ctgovCount++;
+        }
+
+        // 2. Try PubMed abstract
+        if (t.pmid) {
+          const pubData = await fetchPubMedAbstract(t.pmid);
+          if (pubData && pubData.lang === 'eng' && !pubData.isRetracted) {
+            const pubResults = parseAbstractEffects(pubData.abstract);
+            trialResult.pubmedRaw = pubResults.map(function(pr) {
+              pr.pmid = t.pmid;
+              return pr;
+            });
+            if (pubResults.length > 0) pubmedCount++;
+            if (pubData.authors && !trialResult.authorYear) {
+              trialResult.authorYear = pubData.authors + (pubData.year ? ' ' + pubData.year : '');
+            }
+            if (pubData.isRetracted) {
+              trialResult.retracted = true;
+            }
+          }
+        }
+
+        // 3. Smart merge
+        const merged = smartMergeOutcomes(trialResult.ctgovRaw, trialResult.pubmedRaw);
+        trialResult.outcomes = merged;
+        trialResult.source = trialResult.ctgovRaw.length > 0 && trialResult.pubmedRaw.length > 0 ? 'both' :
+          trialResult.ctgovRaw.length > 0 ? 'ctgov' : trialResult.pubmedRaw.length > 0 ? 'pubmed' : 'none';
+
+        if (merged.length === 0) noDataCount++;
+
+        _extractionResults.push(trialResult);
+      }
+
+      statusEl.textContent = trials.length + ' trials processed: ' +
+        ctgovCount + ' CT.gov, ' + pubmedCount + ' PubMed, ' + noDataCount + ' no data';
+
+      renderExtractionReview();
+
+    } catch (err) {
+      showToast('Auto-extract error: ' + (err?.message || err), 'danger');
+      statusEl.textContent = 'Error: ' + (err?.message || err);
+    } finally {
+      _autoExtractRunning = false;
+      btn.disabled = false;
+    }
+  }
+
+  /**
+   * Smart merge: CT.gov outcomes are primary. PubMed outcomes only included
+   * if no matching CT.gov outcome exists (by effect type + estimate proximity).
+   */
+  function smartMergeOutcomes(ctgovResults, pubmedResults) {
+    const merged = [];
+
+    for (const ct of ctgovResults) {
+      if (ct.effectType === 'MD_RAW') {
+        merged.push({
+          effectType: 'MD',
+          estimate: ct.rawMeans ? (ct.rawMeans.mean1 - ct.rawMeans.mean2) : null,
+          lowerCI: null,
+          upperCI: null,
+          pValue: ct.pValue,
+          outcomeTitle: ct.outcomeTitle,
+          source: 'ctgov',
+          evidence: { ctgov: { fieldPath: ct.fieldPath, rawMeans: ct.rawMeans } },
+          arms: ct.arms,
+          rawMeans: ct.rawMeans,
+          isPrimary: ct.isPrimary || false,
+          outcomeType: ct.outcomeType || '',
+          checked: ct.isPrimary !== false
+        });
+      } else {
+        merged.push({
+          effectType: ct.effectType,
+          estimate: ct.estimate,
+          lowerCI: ct.lowerCI,
+          upperCI: ct.upperCI,
+          pValue: ct.pValue,
+          outcomeTitle: ct.outcomeTitle,
+          source: 'ctgov',
+          evidence: { ctgov: { fieldPath: ct.fieldPath } },
+          arms: ct.arms,
+          isPrimary: ct.isPrimary || false,
+          outcomeType: ct.outcomeType || '',
+          checked: ct.isPrimary !== false
+        });
+      }
+    }
+
+    for (const pm of pubmedResults) {
+      const hasCTMatch = ctgovResults.some(function(ct) {
+        return ct.effectType === pm.effectType &&
+          Math.abs((ct.estimate || 0) - pm.estimate) < 0.05;
+      });
+      merged.push({
+        effectType: pm.effectType,
+        estimate: pm.estimate,
+        lowerCI: pm.lowerCI,
+        upperCI: pm.upperCI,
+        pValue: pm.pValue,
+        outcomeTitle: pm.effectType + ' outcome',
+        source: hasCTMatch ? 'both' : 'pubmed',
+        evidence: {
+          pubmed: { pmid: pm.pmid, sentence: pm.sourceSentence, matchSpan: pm.matchSpan },
+          ctgov: hasCTMatch ? merged.find(function(m) { return m.effectType === pm.effectType; })?.evidence.ctgov : null
+        },
+        checked: !hasCTMatch
+      });
+    }
+
+    return merged;
+  }
+
+  function renderExtractionReview() {
+    const panel = document.getElementById('extractionReviewPanel');
+    if (!panel) return;
+
+    const trialsWithData = _extractionResults.filter(function(t) { return t.outcomes.length > 0; });
+    const totalOutcomes = trialsWithData.reduce(function(s, t) { return s + t.outcomes.length; }, 0);
+    const primaryCount = trialsWithData.reduce(function(s, t) {
+      return s + t.outcomes.filter(function(o) { return o.isPrimary; }).length;
+    }, 0);
+
+    let html = '<div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;background:var(--surface);z-index:2">' +
+      '<strong>Extraction Review</strong>' +
+      '<span class="text-muted" style="font-size:0.82rem">' +
+        _extractionResults.length + ' trials searched &middot; ' +
+        trialsWithData.length + ' with results &middot; ' +
+        totalOutcomes + ' effect sizes' +
+        (primaryCount > 0 ? ' (' + primaryCount + ' primary)' : '') +
+      '</span>' +
+      '<div style="margin-left:auto;display:flex;gap:6px">' +
+        (primaryCount > 0 ? '<button class="btn-outline btn-sm" onclick="selectPrimaryOnly()" title="Check only primary outcomes, uncheck secondary/other" style="border-color:#10b981;color:#10b981">Primary Only</button>' : '') +
+        '<button class="btn-success btn-sm" onclick="acceptExtractedStudies()">Accept Selected &rarr; Extract Table</button>' +
+        '<button class="btn-outline btn-sm" onclick="exportEvidenceCSV()">Export Evidence CSV</button>' +
+        '<button class="btn-outline btn-sm" onclick="document.getElementById(\'extractionReviewPanel\').style.display=\'none\'">Close</button>' +
+      '</div>' +
+    '</div>';
+
+    for (let ti = 0; ti < _extractionResults.length; ti++) {
+      var t = _extractionResults[ti];
+      var badgeClass = t.source === 'both' ? 'both' : t.source === 'ctgov' ? 'ctgov' : t.source === 'pubmed' ? 'pubmed' : '';
+
+      html += '<div class="extract-review-trial">' +
+        '<label style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
+          '<input type="checkbox" data-trial-idx="' + ti + '" ' + (t.outcomes.length > 0 ? 'checked' : '') +
+          ' onchange="toggleExtractionTrial(' + ti + ',this.checked)">' +
+          '<strong>' + escapeHtml(t.nctId || 'PMID:' + t.pmid) + '</strong> &mdash; ' +
+          escapeHtml(t.authorYear || t.title.slice(0, 60)) +
+          (badgeClass ? ' <span class="source-badge ' + badgeClass + '">' + escapeHtml(t.source) + '</span>' : '') +
+          (t.retracted ? ' <span style="color:#ef4444;font-weight:700">RETRACTED</span>' : '') +
+        '</label>';
+
+      if (t.outcomes.length === 0) {
+        html += '<div class="text-muted" style="margin-left:28px;font-size:0.82rem">No extractable data found</div>';
+      }
+
+      for (let oi = 0; oi < t.outcomes.length; oi++) {
+        var o = t.outcomes[oi];
+        var isPubmedOnly = o.source === 'pubmed';
+        html += '<div class="extract-review-outcome' + (isPubmedOnly ? ' pubmed-only' : '') + '">' +
+          '<label style="display:flex;align-items:center;gap:6px">' +
+            '<input type="checkbox" data-trial-idx="' + ti + '" data-outcome-idx="' + oi + '" ' +
+            (o.checked ? 'checked' : '') +
+            ' onchange="_extractionResults[' + ti + '].outcomes[' + oi + '].checked=this.checked">' +
+            '<span class="source-badge ' + (o.source === 'both' ? 'both' : o.source) + '" style="font-size:0.6rem">' + escapeHtml(o.source) + '</span>' +
+            (o.isPrimary ? '<span style="font-size:0.6rem;padding:1px 5px;border-radius:3px;background:#065f46;color:#6ee7b7;font-weight:700;letter-spacing:0.3px">PRIMARY</span>' :
+             o.outcomeType === 'SECONDARY' ? '<span style="font-size:0.58rem;padding:1px 4px;border-radius:3px;background:#334155;color:#94a3b8">SECONDARY</span>' : '') +
+            '<span style="font-size:0.82rem;color:var(--text-muted)">' + escapeHtml(o.outcomeTitle) + '</span>' +
+          '</label>' +
+          '<div class="extract-review-value" style="margin:4px 0 4px 28px">' +
+            escapeHtml(o.effectType) + ' = ' +
+            '<input type="number" step="any" value="' + (o.estimate ?? '') + '" onchange="_extractionResults[' + ti + '].outcomes[' + oi + '].estimate=parseFloat(this.value)">' +
+            ' 95% CI [' +
+            '<input type="number" step="any" value="' + (o.lowerCI ?? '') + '" onchange="_extractionResults[' + ti + '].outcomes[' + oi + '].lowerCI=parseFloat(this.value)">' +
+            ', ' +
+            '<input type="number" step="any" value="' + (o.upperCI ?? '') + '" onchange="_extractionResults[' + ti + '].outcomes[' + oi + '].upperCI=parseFloat(this.value)">' +
+            ']' +
+            (o.pValue != null ? ' p=' + o.pValue : '') +
+          '</div>';
+
+        if (o.evidence) {
+          html += '<div class="evidence-text">';
+          if (o.evidence.ctgov) {
+            html += '<strong>CT.gov:</strong> ' + escapeHtml(o.evidence.ctgov.fieldPath || '');
+            if (o.evidence.ctgov.rawMeans) {
+              var rm = o.evidence.ctgov.rawMeans;
+              html += ' (mean1=' + rm.mean1 + ' SD=' + rm.sd1 + ' n=' + rm.n1 +
+                '; mean2=' + rm.mean2 + ' SD=' + rm.sd2 + ' n=' + rm.n2 + ')';
+            }
+            html += '<br>';
+          }
+          if (o.evidence.pubmed) {
+            var sent = o.evidence.pubmed.sentence || '';
+            var span = o.evidence.pubmed.matchSpan;
+            var highlighted = sent;
+            if (span && span[0] != null && span[1] != null) {
+              highlighted = escapeHtml(sent.slice(0, span[0])) +
+                '<span class="evidence-highlight">' + escapeHtml(sent.slice(span[0], span[1])) + '</span>' +
+                escapeHtml(sent.slice(span[1]));
+            } else {
+              highlighted = escapeHtml(sent);
+            }
+            html += '<strong>PubMed ' + escapeHtml(o.evidence.pubmed.pmid || '') + ':</strong> ' + highlighted;
+          }
+          html += '</div>';
+        }
+
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    panel.innerHTML = html;
+    panel.style.display = 'block';
+  }
+
+  function toggleExtractionTrial(trialIdx, checked) {
+    var t = _extractionResults[trialIdx];
+    if (!t) return;
+    for (var i = 0; i < t.outcomes.length; i++) {
+      t.outcomes[i].checked = checked;
+    }
+    var boxes = document.querySelectorAll('input[data-trial-idx="' + trialIdx + '"][data-outcome-idx]');
+    for (var b of boxes) b.checked = checked;
+  }
+
+  function selectPrimaryOnly() {
+    for (var ti = 0; ti < _extractionResults.length; ti++) {
+      var t = _extractionResults[ti];
+      var hasPrimary = t.outcomes.some(function(o) { return o.isPrimary; });
+      for (var oi = 0; oi < t.outcomes.length; oi++) {
+        // If trial has primary outcomes, check only those; otherwise keep first outcome
+        t.outcomes[oi].checked = hasPrimary ? t.outcomes[oi].isPrimary : (oi === 0);
+      }
+    }
+    renderExtractionReview();
+    var primaryN = _extractionResults.reduce(function(s, t) {
+      return s + t.outcomes.filter(function(o) { return o.checked; }).length;
+    }, 0);
+    showToast(primaryN + ' primary outcomes selected', 'success');
+  }
+
+  function acceptExtractedStudies() {
+    var accepted = 0;
+    for (var t of _extractionResults) {
+      for (var o of t.outcomes) {
+        if (!o.checked) continue;
+        if (o.estimate == null && !o.rawMeans) continue;
+
+        var data = {
+          authorYear: t.authorYear || '',
+          trialId: t.nctId || (t.pmid ? 'PMID:' + t.pmid : ''),
+          nctId: t.nctId || '',
+          pmid: t.pmid || '',
+          doi: t.doi || '',
+          outcomeId: o.outcomeTitle || 'primary outcome',
+          effectEstimate: o.estimate,
+          lowerCI: o.lowerCI,
+          upperCI: o.upperCI,
+          pValue: o.pValue,
+          effectType: o.effectType,
+          treatment1: (o.arms && o.arms[0]) ? o.arms[0] : '',
+          treatment2: (o.arms && o.arms[1]) ? o.arms[1] : '',
+          notes: '[Auto-extracted: ' + o.source + ']',
+          extractionSource: o.source,
+          extractionEvidence: o.evidence
+        };
+
+        if (o.rawMeans) {
+          data.mean1 = o.rawMeans.mean1;
+          data.sd1 = o.rawMeans.sd1;
+          data.nArm1 = o.rawMeans.n1;
+          data.mean2 = o.rawMeans.mean2;
+          data.sd2 = o.rawMeans.sd2;
+          data.nArm2 = o.rawMeans.n2;
+        }
+
+        addStudyRow(data);
+        accepted++;
+      }
+    }
+
+    if (accepted > 0) {
+      showToast(accepted + ' effect sizes added to Extract table', 'success');
+      document.getElementById('extractionReviewPanel').style.display = 'none';
+      switchPhase('extract');
+    } else {
+      showToast('No outcomes selected', 'warning');
+    }
+  }
+
+  function exportEvidenceCSV() {
+    var rows = ['Trial,NCT_ID,PMID,Outcome,Effect_Type,Estimate,Lower_CI,Upper_CI,P_Value,Source,CTgov_Field,PubMed_Sentence'];
+    for (var t of _extractionResults) {
+      for (var o of t.outcomes) {
+        var pmSent = (o.evidence?.pubmed?.sentence || '').replace(/"/g, '""');
+        rows.push([
+          '"' + (t.authorYear || '').replace(/"/g, '""') + '"',
+          t.nctId || '',
+          t.pmid || '',
+          '"' + (o.outcomeTitle || '').replace(/"/g, '""') + '"',
+          o.effectType,
+          o.estimate ?? '',
+          o.lowerCI ?? '',
+          o.upperCI ?? '',
+          o.pValue ?? '',
+          o.source,
+          '"' + (o.evidence?.ctgov?.fieldPath || '').replace(/"/g, '""') + '"',
+          '"' + pmSent + '"'
+        ].join(','));
+      }
+    }
+    downloadFile(rows.join('\n'), 'extraction-evidence.csv', 'text/csv');
+    showToast('Evidence CSV exported', 'success');
   }
 
   // ============================================================
@@ -15554,7 +16352,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     tt.innerHTML = '<h4>' + escapeHtml(n.label) + '</h4>' +
       '<div class="tt-stat">' + n.totalRCTs + ' RCTs (' + n.recentRCTs + ' in last 3yr)</div>' +
       '<div class="tt-stat">' + n.maCount + ' meta-analyses (last 5yr)</div>' +
-      '<div class="tt-stat">Gap score: ' + n.gapScore.toFixed(1) + ' (' + n.opportunity + ')</div>' +
+      '<div class="tt-stat">Gap score: ' + n.gapScore.toFixed(1) + ' (' + escapeHtml(n.opportunity || '') + ')</div>' +
       (ivList ? '<div class="tt-stat" style="margin-top:4px">Top drugs: ' + ivList + '</div>' : '') +
       glHtml + connHtml +
       '<div style="margin-top:6px;color:#94a3b8;font-size:0.7rem">Click to explore</div>';
@@ -15656,7 +16454,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           sparkYears.map(v => '<div class="sparkline-bar" style="height:' + Math.max(2, (v/maxSpk)*100) + '%"></div>').join('') +
         '</div>' +
         '<div class="card-actions">' +
-          '<button class="opp-start-btn" onclick="startReviewFromUniverse(\'' + escapeHtml(c.label.replace(/'/g, '\\&#39;')) + '\',\'' + escapeHtml(subcatNode.id) + '\')">Start Review</button>' +
+          '<button class="opp-start-btn" onclick="startReviewFromUniverse(' + escapeHtml(JSON.stringify(c.label)) + ',' + escapeHtml(JSON.stringify(subcatNode.id)) + ')">Start Review</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -15737,7 +16535,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const sh = cluster.shahid;
       const revId = sh.pw_entry.review_id || '';
       html += '<div style="font-size:0.8rem;color:var(--text-muted)">Validated against</div>';
-      html += '<div style="font-weight:600"><a href="https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.' + escapeHtml(revId.split('_')[0]) + '/full" target="_blank" rel="noopener" style="color:var(--primary)">' + escapeHtml(revId) + '</a></div>';
+      html += '<div style="font-weight:600"><a href="https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.' + encodeURIComponent(revId.split('_')[0]) + '/full" target="_blank" rel="noopener" style="color:var(--primary)">' + escapeHtml(revId) + '</a></div>';
       html += '<div style="font-size:0.82rem">Agreement: ' + escapeHtml(sh.agreement || '') + ' (score: ' + (sh.match_score ?? 'N/A') + ')</div>';
       html += '<div style="font-size:0.82rem">Cochrane k=' + (sh.pw_entry.k || '?') + ', &theta;=' + (sh.pw_entry.theta != null ? sh.pw_entry.theta.toFixed(3) : '?') + '</div>';
     }
@@ -15784,7 +16582,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     for (var i = 0; i < sortedStudies.length; i++) {
       var s = sortedStudies[i];
       var nctLink = s.nct_id
-        ? '<a href="https://clinicaltrials.gov/study/' + escapeHtml(s.nct_id) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(s.nct_id) + '</a>'
+        ? '<a href="https://clinicaltrials.gov/study/' + encodeURIComponent(s.nct_id) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(s.nct_id) + '</a>'
         : '<span style="opacity:0.5">N/A</span>';
       var effVal = s.effect_estimate != null ? (isRatio ? s.effect_estimate.toFixed(2) : s.effect_estimate.toFixed(2)) : 'N/A';
       var ciVal = (s.lower_ci != null && s.upper_ci != null) ? '[' + s.lower_ci.toFixed(2) + ', ' + s.upper_ci.toFixed(2) + ']' : 'N/A';
@@ -15866,7 +16664,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     for (var i = 0; i < displayTrials.length; i++) {
       var t = displayTrials[i];
       var nctLink = t.nctId
-        ? '<a href="https://clinicaltrials.gov/study/' + escapeHtml(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>'
+        ? '<a href="https://clinicaltrials.gov/study/' + encodeURIComponent(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>'
         : 'N/A';
       var titleShort = (t.title || '').length > 60 ? t.title.substring(0, 57) + '...' : (t.title || '');
       // AACT enrichment: conditions and arm count in title tooltip
@@ -15987,7 +16785,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Recent (3yr)</div><div style="font-weight:600">' + n.recentRCTs + '</div>';
     html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Meta-analyses (5yr)</div><div>' + n.maCount + '</div>';
     html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Gap Score</div>';
-    html += '<div style="font-weight:600;color:' + (n.opportunity === 'HIGH' ? '#ef4444' : n.opportunity === 'MODERATE' ? '#f59e0b' : '#10b981') + '">' + n.gapScore.toFixed(1) + ' (' + n.opportunity + ')</div>';
+    html += '<div style="font-weight:600;color:' + (n.opportunity === 'HIGH' ? '#ef4444' : n.opportunity === 'MODERATE' ? '#f59e0b' : '#10b981') + '">' + n.gapScore.toFixed(1) + ' (' + escapeHtml(n.opportunity || '') + ')</div>';
     html += '</div>';
 
     // Top interventions
@@ -16056,7 +16854,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var show = trials.slice(0, 50);
     for (var i = 0; i < show.length; i++) {
       var t = show[i];
-      var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + escapeHtml(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
+      var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + encodeURIComponent(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
       var titleShort = (t.title || '').length > 60 ? t.title.substring(0, 57) + '...' : (t.title || '');
       var ivs = getTrialInterventionNames(t, {
         excludeComparators: true,
@@ -16136,6 +16934,29 @@ body.dark-mode .input-error { background: #451a1a !important; }
   let currentUniverseView = 'network';
   let universeTrialsCache = []; // all loaded trials for views
 
+  // Arrow key nav for universe and insights tab bars
+  (function initSubTabArrowKeys() {
+    function wireTablistArrows(selector, clickFn) {
+      var bar = document.querySelector(selector);
+      if (!bar) return;
+      bar.addEventListener('keydown', function(e) {
+        if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+        var tabs = Array.from(bar.querySelectorAll('[role="tab"]'));
+        var idx = tabs.indexOf(document.activeElement);
+        if (idx < 0) return;
+        e.preventDefault();
+        if (e.key === 'ArrowRight') idx = (idx + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') idx = (idx - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') idx = 0;
+        else if (e.key === 'End') idx = tabs.length - 1;
+        tabs[idx].focus();
+        tabs[idx].click();
+      });
+    }
+    wireTablistArrows('.universe-view-tabs');
+    wireTablistArrows('.insights-nav');
+  })();
+
   function switchUniverseView(viewName) {
     currentUniverseView = viewName;
     // Update tabs
@@ -16143,6 +16964,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const isActive = tab.dataset.view === viewName;
       tab.classList.toggle('active', isActive);
       tab.setAttribute('aria-selected', isActive);
+      tab.setAttribute('tabindex', isActive ? '0' : '-1');
     });
     // Show/hide view containers
     document.querySelectorAll('.universe-view').forEach(el => el.classList.remove('active'));
@@ -17131,7 +17953,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           const bgColor = sig ? (beneficial ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)') : 'rgba(148,163,184,0.08)';
           totalK += p.k;
           html += '<td style="padding:5px 6px;border:1px solid var(--border);background:' + bgColor + ';cursor:pointer" ' +
-            'onclick="drillDownAlBurhanCluster(\'' + escapeHtml(r.id) + '\')" title="' + escapeHtml(r.outcome || '') + ' (' + r.effect_type + ')">';
+            'onclick="drillDownAlBurhanCluster(\'' + escapeHtml(r.id) + '\')" title="' + escapeHtml(r.outcome || '') + ' (' + escapeHtml(r.effect_type || '') + ')">';
           html += '<strong>' + p.effect.toFixed(2) + '</strong><br>';
           html += '<span style="font-size:0.65rem;color:var(--text-muted)">k=' + p.k + '</span>';
           html += '</td>';
@@ -17335,7 +18157,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
     return '<div style="display:inline-block;vertical-align:top;margin:4px 8px 8px 0;border:1px solid var(--border);border-radius:var(--radius);padding:8px;width:360px">' +
       '<div style="font-size:0.78rem;font-weight:600;margin-bottom:2px">' + escapeHtml(cluster.drug_class) + ' (' + escapeHtml(cluster.subcategory) + ')</div>' +
-      '<div style="font-size:0.7rem;color:var(--text-muted)">' + escapeHtml(cluster.outcome || '') + ' | ' + cluster.effect_type + ' | k=' + last.k + ' | ' + velStr + convStr + '</div>' +
+      '<div style="font-size:0.7rem;color:var(--text-muted)">' + escapeHtml(cluster.outcome || '') + ' | ' + escapeHtml(cluster.effect_type || '') + ' | k=' + last.k + ' | ' + velStr + convStr + '</div>' +
       svg + '</div>';
   }
 
@@ -17792,8 +18614,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
         conclusion = 'harmful';  // Reached RIS AND z exceeds final boundary (harm)
       } else if (lastPt.info_fraction >= 1.0) {
         conclusion = 'futile';  // Reached RIS but did not cross boundary
-      } else if (directedZ >= 0 && directedZ < lastPt.futility) {
-        conclusion = 'futile';  // Below futility boundary in benefit direction
+      } else if (lastPt.info_fraction >= 0.5 && directedZ >= 0 && directedZ < lastPt.futility) {
+        conclusion = 'futile';  // Below futility boundary (only at >=50% information)
       }
     }
 
@@ -17805,7 +18627,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       boundaries,
       conclusion,  // 'firm', 'harmful', 'insufficient', or 'futile'
       benefit_direction: benefitDirection,
-      anticipated_from_observed: !anticipatedFromUser,  // circular reasoning warning
+      anticipated_from_observed: !anticipatedFromUser,  // circular reasoning flag
+      circular_warning: !anticipatedFromUser ? 'WARNING: Anticipated effect derived from observed pooled estimate. This is circular — specify a clinically meaningful anticipated effect (e.g., MCID or 15-20% RRR) for valid TSA conclusions (Wetterslev 2008).' : null,
       alpha,
       beta,
       anticipated_effect: anticipated,
@@ -18455,7 +19278,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const btnX = W/2 - btnW/2, btnY = H/2 + 38;
       ctx.fillStyle = tc.primary;
       ctx.beginPath();
-      ctx.roundRect(btnX, btnY, btnW, btnH, 6);
+      if (ctx.roundRect) { ctx.roundRect(btnX, btnY, btnW, btnH, 6); } else { ctx.moveTo(btnX+6,btnY); ctx.lineTo(btnX+btnW-6,btnY); ctx.arcTo(btnX+btnW,btnY,btnX+btnW,btnY+6,6); ctx.lineTo(btnX+btnW,btnY+btnH-6); ctx.arcTo(btnX+btnW,btnY+btnH,btnX+btnW-6,btnY+btnH,6); ctx.lineTo(btnX+6,btnY+btnH); ctx.arcTo(btnX,btnY+btnH,btnX,btnY+btnH-6,6); ctx.lineTo(btnX,btnY+6); ctx.arcTo(btnX,btnY,btnX+6,btnY,6); }
       ctx.fill();
       ctx.fillStyle = tc.surface;
       ctx.font = 'bold 13px system-ui';
@@ -18770,7 +19593,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       ctx.strokeStyle = node.color;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.roundRect(tx, ty, tw, th, 6);
+      if (ctx.roundRect) { ctx.roundRect(tx, ty, tw, th, 6); } else { ctx.moveTo(tx+6,ty); ctx.lineTo(tx+tw-6,ty); ctx.arcTo(tx+tw,ty,tx+tw,ty+6,6); ctx.lineTo(tx+tw,ty+th-6); ctx.arcTo(tx+tw,ty+th,tx+tw-6,ty+th,6); ctx.lineTo(tx+6,ty+th); ctx.arcTo(tx,ty+th,tx,ty+th-6,6); ctx.lineTo(tx,ty+6); ctx.arcTo(tx,ty,tx+6,ty,6); }
       ctx.fill();
       ctx.stroke();
 
@@ -18969,8 +19792,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
           if (n.topOutcomes && n.topOutcomes.length > 0) {
             html += 'Outcomes: ' + escapeHtml(n.topOutcomes.join(', ')) + '<br>';
           }
-          html += '<button class="opp-start-btn" style="margin-top:6px" onclick="startReviewFromUniverse(\'' +
-            escapeHtml(n.label.replace(/'/g, '\\&#39;')) + '\',\'' + escapeHtml(n.subcatId) + '\')">Start Review</button>';
+          html += '<button class="opp-start-btn" style="margin-top:6px" onclick="startReviewFromUniverse(' +
+            escapeHtml(JSON.stringify(n.label)) + ',' + escapeHtml(JSON.stringify(n.subcatId)) + ')">Start Review</button>';
         }
 
         tooltip.innerHTML = html;
@@ -19156,7 +19979,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           tt.innerHTML = '<h4>' + escapeHtml(it.label) + '</h4>' +
             '<div class="tt-stat">Enrollment: ' + it.value.toLocaleString() + '</div>' +
             '<div class="tt-stat">' + (g.totalRCTs || 0) + ' RCTs | ' + (g.recentRCTs || 0) + ' recent</div>' +
-            '<div class="tt-stat">Gap: ' + (g.gapScore || 0).toFixed(1) + ' (' + (g.opportunity || 'N/A') + ')</div>' +
+            '<div class="tt-stat">Gap: ' + (g.gapScore || 0).toFixed(1) + ' (' + escapeHtml(g.opportunity || 'N/A') + ')</div>' +
             '<div style="margin-top:4px;font-size:0.7rem;color:#94a3b8">Top: ' + topIvs.map(iv => escapeHtml(iv[0])).join(', ') + '</div>';
           tt.style.left = (e.clientX - cRect.left + 15) + 'px';
           tt.style.top = (e.clientY - cRect.top - 10) + 'px';
@@ -19382,7 +20205,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       var show = catTrials.slice(0, 20);
       for (var j = 0; j < show.length; j++) {
         var t = show[j];
-        var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + escapeHtml(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.75rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
+        var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + encodeURIComponent(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.75rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
         var titleShort = (t.title || '').length > 50 ? t.title.substring(0, 47) + '...' : (t.title || '');
         html += '<tr><td style="padding:3px 6px;border-bottom:1px solid var(--border)">' + nctLink + '</td>';
         html += '<td style="padding:3px 6px;border-bottom:1px solid var(--border)" title="' + escapeHtml(t.title || '') + '">' + escapeHtml(titleShort) + '</td>';
@@ -19566,7 +20389,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       var show = matchTrials.slice(0, 30);
       for (var i = 0; i < show.length; i++) {
         var t = show[i];
-        var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + escapeHtml(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
+        var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + encodeURIComponent(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
         var titleShort = (t.title || '').length > 60 ? t.title.substring(0, 57) + '...' : (t.title || '');
         var rowBg = i % 2 === 0 ? '' : 'background:var(--bg-alt,#f8fafc);';
         html += '<tr style="' + rowBg + '"><td style="padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap">' + nctLink + '</td>';
@@ -19684,7 +20507,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           tt.innerHTML = '<strong>' + escapeHtml(b.label) + '</strong><br>' +
             b.totalRCTs + ' total RCTs | ' + b.y + ' recent (3yr)<br>' +
             b.x + ' meta-analyses (5yr)<br>' +
-            'Gap score: ' + b.gapScore.toFixed(1) + ' (' + b.opportunity + ')<br>' +
+            'Gap score: ' + b.gapScore.toFixed(1) + ' (' + escapeHtml(b.opportunity || '') + ')<br>' +
             'Enrollment: ' + b.size.toLocaleString();
           tt.style.left = (e.clientX - cRect.left + 15) + 'px';
           tt.style.top = (e.clientY - cRect.top - 10) + 'px';
@@ -19837,7 +20660,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var show = matchTrials.slice(0, 50);
     for (var i = 0; i < show.length; i++) {
       var t = show[i];
-      var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + escapeHtml(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
+      var nctLink = t.nctId ? '<a href="https://clinicaltrials.gov/study/' + encodeURIComponent(t.nctId) + '" target="_blank" rel="noopener" style="color:var(--primary);font-family:monospace;font-size:0.78rem">' + escapeHtml(t.nctId) + '</a>' : 'N/A';
       var titleShort = (t.title || '').length > 50 ? t.title.substring(0, 47) + '...' : (t.title || '');
       var cat = getSubcategory(t.subcategory || 'general');
       var rowBg = i % 2 === 0 ? '' : 'background:var(--bg-alt,#f8fafc);';
@@ -19980,7 +20803,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
   }
 
   function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => showToast('Copied!', 'success'));
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('Copied!', 'success'))
+      .catch(() => showToast('Copy failed — clipboard access denied', 'danger'));
   }
 
   // Debounced version of savePICO for oninput (save-as-you-type, 400ms delay)
@@ -20425,7 +21250,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
         (topTreat ? escapeHtml(topTreat) + ' ranked highest with a P-score of ' + (topPscore * 100).toFixed(1) + '%. ' : '') +
         (topVsRef ? 'The key comparison was ' + topVsRef + '. ' : '') +
         'A league table of all ' + (nma.nT * (nma.nT - 1)) + ' pairwise comparisons with ' + confPct + '% confidence and prediction intervals is provided. ' +
-        'Cumulative ranking probabilities were estimated via Monte Carlo simulation (10,000 draws from MVN distribution).\n\n';
+        'Cumulative ranking probabilities were estimated via Monte Carlo simulation (10,000 draws from MVN distribution). ' +
+        'Rankings should be interpreted alongside the certainty of evidence (GRADE); treatments may rank highly despite low certainty of the supporting evidence and should not be interpreted as definitive clinical recommendations (Salanti et al. 2022, BMJ).\n\n';
     }
 
     const methods =
@@ -20907,7 +21733,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       try {
         // P2-4: JSON reviver restores Float64Array from serialized form
         const reviver = (key, value) => {
-          if (value && typeof value === 'object' && value.__typedArray && Array.isArray(value.data)) {
+          if (value && typeof value === 'object' && value.__typedArray && Array.isArray(value.data) && value.data.length <= 100000) {
             return Float64Array.from(value.data);
           }
           return value;
@@ -20963,7 +21789,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // RCT EXTRACTOR INTEGRATION (optional, localhost:8000)
   // ============================================================
   let EXTRACTOR_URL = (safeGetStorage('metaSprintNMA_extractor-url', 'http://localhost:8000') || 'http://localhost:8000').replace(/\/+$/, '');
-  try { const _eu = new URL(EXTRACTOR_URL); if (!['http:', 'https:'].includes(_eu.protocol)) EXTRACTOR_URL = 'http://localhost:8000'; } catch (ue) { msaLog('debug', 'extractor', 'Invalid URL, using default:', ue.message); EXTRACTOR_URL = 'http://localhost:8000'; }
+  try { const _eu = new URL(EXTRACTOR_URL); if (!['http:', 'https:'].includes(_eu.protocol) || !['localhost', '127.0.0.1'].includes(_eu.hostname)) EXTRACTOR_URL = 'http://localhost:8000'; } catch (ue) { msaLog('debug', 'extractor', 'Invalid URL, using default:', ue.message); EXTRACTOR_URL = 'http://localhost:8000'; }
   const EXTRACTOR_MIN_CONFIDENCE = 0.70;
   const CARDIO_REGISTRY_ONLY_MODE = true;
   const DISABLE_PDF_UPLOAD_MODE = true;
@@ -21119,6 +21945,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
   }
 
   let _extractorPrevFocus = null;
+  let _extractorTrapHandler = null;
   function showExtractorModal() {
     _extractorPrevFocus = document.activeElement;
     const overlay = document.getElementById('extractorOverlay');
@@ -21135,11 +21962,24 @@ body.dark-mode .input-error { background: #451a1a !important; }
       statusEl.textContent = 'PDF upload disabled in cardio registry mode. Use structured registry/result text only.';
     }
     document.getElementById('extractorText').focus();
+    // Focus trap
+    _extractorTrapHandler = function(e) {
+      if (e.key === 'Escape') { closeExtractorModal(); return; }
+      if (e.key !== 'Tab') return;
+      const focusable = overlay.querySelectorAll('button, [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    overlay.addEventListener('keydown', _extractorTrapHandler);
     _probeExtractorHealth(statusEl);
   }
 
   function closeExtractorModal() {
-    document.getElementById('extractorOverlay').style.display = 'none';
+    const overlay = document.getElementById('extractorOverlay');
+    overlay.style.display = 'none';
+    if (_extractorTrapHandler) { overlay.removeEventListener('keydown', _extractorTrapHandler); _extractorTrapHandler = null; }
     if (_extractorPrevFocus) { _extractorPrevFocus.focus(); _extractorPrevFocus = null; }
   }
 
@@ -21300,8 +22140,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
   function switchInsightsSubTab(tab) {
     _currentInsightTab = tab;
     document.querySelectorAll('.insights-tab').forEach(t => {
-      t.classList.toggle('active', t.dataset.insight === tab);
-      t.setAttribute('aria-selected', t.dataset.insight === tab ? 'true' : 'false');
+      var isActive = t.dataset.insight === tab;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      t.setAttribute('tabindex', isActive ? '0' : '-1');
     });
     document.querySelectorAll('.insight-panel').forEach(p => {
       p.classList.toggle('active', p.id === 'insight-' + tab);
@@ -21704,21 +22546,39 @@ body.dark-mode .input-error { background: #451a1a !important; }
             let subset = [...studies];
             let exclLabel = 'All studies';
             if (excl === 'leaveOutLargest') {
-              // Remove study with largest weight
-              const maxW = Math.max(...subset.map(s => 1 / ((s.sei ?? 0.5) ** 2)));
-              const idxMax = subset.findIndex(s => 1 / ((s.sei ?? 0.5) ** 2) === maxW);
-              if (idxMax >= 0) { exclLabel = 'Drop largest'; subset.splice(idxMax, 1); }
+              // Remove study with largest weight (argmax avoids float === comparison)
+              let idxMax = 0, bestW = -Infinity;
+              for (let si = 0; si < subset.length; si++) {
+                const w = 1 / ((subset[si].sei ?? 0.5) ** 2);
+                if (w > bestW) { bestW = w; idxMax = si; }
+              }
+              if (subset.length > 0) { exclLabel = 'Drop largest'; subset.splice(idxMax, 1); }
             } else if (excl === 'leaveOutSmallest') {
-              const minW = Math.min(...subset.map(s => 1 / ((s.sei ?? 0.5) ** 2)));
-              const idxMin = subset.findIndex(s => 1 / ((s.sei ?? 0.5) ** 2) === minW);
-              if (idxMin >= 0) { exclLabel = 'Drop smallest'; subset.splice(idxMin, 1); }
+              let idxMin = 0, bestW = Infinity;
+              for (let si = 0; si < subset.length; si++) {
+                const w = 1 / ((subset[si].sei ?? 0.5) ** 2);
+                if (w < bestW) { bestW = w; idxMin = si; }
+              }
+              if (subset.length > 0) { exclLabel = 'Drop smallest'; subset.splice(idxMin, 1); }
             }
 
             if (subset.length < 2) return;
 
             // Run meta-analysis with these specs
-            const yi = subset.map(s => isRatio ? Math.log(s.effect ?? 1) : (s.effect ?? 0));
-            const sei = subset.map(s => s.sei ?? 0.5);
+            const studyCiZShura = normalQuantile(0.975);
+            const yi = subset.map(s => {
+              if (s.yi != null) return s.yi;
+              const val = s.effectEstimate ?? s.effect ?? (isRatio ? 1 : 0);
+              return isRatio ? Math.log(val) : val;
+            });
+            const sei = subset.map(s => {
+              if (s.sei != null && s.sei > 0) return s.sei;
+              if (s.se != null && s.se > 0) return s.se;
+              const lo = isRatio ? Math.log(s.lowerCI ?? s.lo ?? 1) : (s.lowerCI ?? s.lo ?? 0);
+              const hi = isRatio ? Math.log(s.upperCI ?? s.hi ?? 1) : (s.upperCI ?? s.hi ?? 0);
+              const computed = (hi - lo) / (2 * studyCiZShura);
+              return computed > 0 ? computed : 0.5;
+            });
             const wi = sei.map(se => 1 / (se * se));
             const sumW = wi.reduce((a, b) => a + b, 0);
             const muFE = wi.reduce((s, w, i) => s + w * yi[i], 0) / sumW;
@@ -21734,7 +22594,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
             let seRE;
             if (ci === 'HKSJ' && subset.length > 2) {
-              const qHKSJ = wiRE.reduce((s, w, i) => s + w * (yi[i] - muRE) ** 2, 0) / (subset.length - 1);
+              const qRaw = wiRE.reduce((s, w, i) => s + w * (yi[i] - muRE) ** 2, 0) / (subset.length - 1);
+              const qHKSJ = Math.max(1, qRaw);  // Roever 2015: prevent narrower-than-DL CIs
               seRE = Math.sqrt(qHKSJ / sumWRE);
             } else {
               seRE = Math.sqrt(1 / sumWRE);
@@ -21770,10 +22631,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
   }
 
   function _remlTau2(yi, sei) {
-    // Simple REML via Fisher scoring (10 iterations)
+    // REML via Fisher scoring (50 iterations, tol=1e-6) — Viechtbauer 2005 eq. 9-10
     const k = yi.length;
     let tau2 = 0.1;
-    for (let iter = 0; iter < 10; iter++) {
+    for (let iter = 0; iter < 50; iter++) {
       const wi = sei.map(se => 1 / (se * se + tau2));
       const sumW = wi.reduce((a, b) => a + b, 0);
       const mu = wi.reduce((s, w, i) => s + w * yi[i], 0) / sumW;
@@ -21783,10 +22644,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
         dl += wi[i] * wi[i] * (r * r - 1 / wi[i]);
         info += wi[i] * wi[i];
       }
+      // REML correction: add sum(wi^2)/sum(wi) to score function
+      dl += sumW > 0 ? info / sumW : 0;
       dl *= 0.5;
       info *= 0.5;
       if (info <= 0) break;
-      tau2 = Math.max(0, tau2 + dl / info);
+      const delta = dl / info;
+      tau2 = Math.max(0, tau2 + delta);
+      if (Math.abs(delta) < 1e-6) break;
     }
     return tau2;
   }
@@ -21963,8 +22828,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
       nnt = arr > 0 ? Math.ceil(1 / arr) : null;
     } else if (effectType === 'HR') {
       // Convert HR to risk reduction assuming exponential survival
+      // Baseline risk is over the specified time horizon, so normalize hazard rate
       const S0 = 1 - baselineRisk;
-      const lambda0 = -Math.log(S0);
+      const lambda0 = -Math.log(S0) / timeHorizon;  // per-unit-time hazard
       const lambda1 = lambda0 * effect;
       treatRisk = 1 - Math.exp(-lambda1 * timeHorizon);
       const controlRisk = 1 - Math.exp(-lambda0 * timeHorizon);
@@ -22066,7 +22932,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
     if (query.includes('pool') || query.includes('effect') || query.includes('result')) {
       response = '<strong>Pooled Effect</strong><br>' +
-        'The pooled ' + effectType + ' across ' + k + ' studies is <strong>' + effect.toFixed(3) + '</strong>';
+        'The pooled ' + escapeHtml(effectType) + ' across ' + k + ' studies is <strong>' + effect.toFixed(3) + '</strong>';
       if (ciLo !== null) response += ' (95% CI: ' + ciLo.toFixed(3) + ' to ' + ciHi.toFixed(3) + ')';
       response += '.<br>';
       const isRatio = ['OR','RR','HR'].includes(effectType);
@@ -22346,11 +23212,23 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const cumResults = [];
     for (let k = 2; k <= withYear.length; k++) {
       const subset = withYear.slice(0, k);
-      const yi = subset.map(s => isRatio ? Math.log(s.effect ?? 1) : (s.effect ?? 0));
-      const sei = subset.map(s => s.sei ?? 0.5);
-      const wi = sei.map(se => 1 / (se * se));
+      const studyCiZIhsan = normalQuantile(0.975);
+      const yiArr = subset.map(s => {
+        if (s.yi != null) return s.yi;
+        const val = s.effectEstimate ?? s.effect ?? (isRatio ? 1 : 0);
+        return isRatio ? Math.log(val) : val;
+      });
+      const seiArr = subset.map(s => {
+        if (s.sei != null && s.sei > 0) return s.sei;
+        if (s.se != null && s.se > 0) return s.se;
+        const lo = isRatio ? Math.log(s.lowerCI ?? s.lo ?? 1) : (s.lowerCI ?? s.lo ?? 0);
+        const hi = isRatio ? Math.log(s.upperCI ?? s.hi ?? 1) : (s.upperCI ?? s.hi ?? 0);
+        const computed = (hi - lo) / (2 * studyCiZIhsan);
+        return computed > 0 ? computed : 0.5;
+      });
+      const wi = seiArr.map(se => 1 / (se * se));
       const sumW = wi.reduce((a, b) => a + b, 0);
-      const mu = wi.reduce((s, w, i) => s + w * yi[i], 0) / sumW;
+      const mu = wi.reduce((s, w, i) => s + w * yiArr[i], 0) / sumW;
       const se = Math.sqrt(1 / sumW);
       cumResults.push({
         year: subset[subset.length - 1].year,
@@ -22900,10 +23778,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
       html += '<p>The research did not find a clear difference between the treatment and control groups. This could mean the treatment has no effect, or that more research is needed.</p>';
     }
 
-    // Confidence
+    // Confidence — includes GRADE certainty if available
+    var gradeLabel = analysis?.gradeResult?.label || null;
     html += '<p><strong>How certain are we?</strong> ';
+    if (gradeLabel) {
+      var gradeExplain = gradeLabel === 'HIGH' ? 'We are quite confident in these results.' :
+        gradeLabel === 'MODERATE' ? 'We are moderately confident, but further research could change the findings.' :
+        gradeLabel === 'LOW' ? 'Our confidence is limited; further research is likely to change these findings.' :
+        'We have very little confidence in these results; they should be interpreted with great caution.';
+      html += 'Overall evidence certainty: <span class="rahma-stat">' + escapeHtml(gradeLabel) + '</span>. ' + gradeExplain + ' ';
+    }
     if (I2 < 25) {
-      html += 'The studies agreed well with each other, which increases our confidence.';
+      html += 'The studies agreed well with each other.';
     } else if (I2 < 75) {
       html += 'There was some disagreement between studies, so the true effect might be somewhat different.';
     } else {
@@ -23268,7 +24154,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         const sDir = (s.effect ?? nullVal) > nullVal ? 'harm' : 'benefit';
         if (sDir !== pooledDirection) {
           // Check if statistically significant in opposite direction
-          const zConf = normalQuantile(0.975); // 95% significance threshold for conflict detection
+          const zConf = normalQuantile(1 - (1 - (analysis.confLevel ?? 0.95)) / 2);
           const sLo = (s.effect ?? nullVal) - zConf * (s.sei ?? 1);
           const sHi = (s.effect ?? nullVal) + zConf * (s.sei ?? 1);
           const sigOpposite = isRatio ?
@@ -23421,7 +24307,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       if (recent >= 2 && older >= 2) {
         // There are both old and new trials — good update candidate
         const maxYear = Math.max(...c.years);
-        const medianYear = c.years.sort((a, b) => a - b)[Math.floor(c.years.length / 2)];
+        const medianYear = [...c.years].sort((a, b) => a - b)[Math.floor(c.years.length / 2)];
         opportunities.push({
           intervention: c.intervention,
           outcome: c.outcome,
@@ -23623,9 +24509,11 @@ body.dark-mode .input-error { background: #451a1a !important; }
         else if (e.key === 'ArrowUp') next = Math.max(idx - 1, 0);
         else if (e.key === 'Home') next = 0;
         else if (e.key === 'End') {
-          // Load all remaining items so End key reaches the true last item
-          while (_renderedCount < _currentFiltered.length) {
+          // Load up to 500 more items (avoid freezing UI with 10K+ refs)
+          var endBatches = 0;
+          while (_renderedCount < _currentFiltered.length && endBatches < 10) {
             _appendRefBatch(_currentFiltered, _renderedCount);
+            endBatches++;
           }
           items = Array.from(e.currentTarget.querySelectorAll('.ref-item'));
           next = items.length - 1;
@@ -23935,7 +24823,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       if (s.se != null && isFinite(s.se) && s.se > 0) return s.se.toFixed(6);
       const lo = s.lowerCI, hi = s.upperCI;
       if (lo != null && hi != null) {
-        const zCrit = normalQuantile(1 - (1 - confLvl) / 2);
+        const zCrit = normalQuantile(0.975);  // Studies report 95% CIs
         const se = isRatio ? (Math.log(hi) - Math.log(lo)) / (2 * zCrit) : (hi - lo) / (2 * zCrit);
         return Math.abs(se).toFixed(6);
       }
@@ -24010,7 +24898,11 @@ body.dark-mode .input-error { background: #451a1a !important; }
       if (!container) return;
       // Don't zoom if clicking on interactive elements
       if (e.target.closest('circle[data-node-idx]') || e.target.closest('input')) return;
+      var prevFocusZoom = document.activeElement;
       const modal = document.createElement('div');
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-label', 'Zoomed chart view');
       modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';
       const inner = document.createElement('div');
       inner.style.cssText = 'background:#fff;border-radius:8px;padding:16px;max-width:95vw;max-height:95vh;overflow:auto';
@@ -24023,17 +24915,25 @@ body.dark-mode .input-error { background: #451a1a !important; }
         zoomedSvg.style.height = 'auto';
       }
       modal.appendChild(inner);
-      function closeModal() { modal.remove(); document.removeEventListener('keydown', onEsc); }
-      function onEsc(ev) { if (ev.key === 'Escape') closeModal(); }
-      modal.addEventListener('click', function(ev) { if (ev.target === modal) closeModal(); });
-      document.addEventListener('keydown', onEsc);
       // Close button
       var closeBtn = document.createElement('button');
       closeBtn.textContent = '\u2715';
+      closeBtn.setAttribute('aria-label', 'Close zoomed view');
       closeBtn.style.cssText = 'position:absolute;top:12px;right:16px;font-size:1.5rem;background:none;color:#fff;border:none;cursor:pointer';
-      closeBtn.onclick = closeModal;
       modal.appendChild(closeBtn);
+      function closeModal() { modal.remove(); document.removeEventListener('keydown', onZoomKey); if (prevFocusZoom) prevFocusZoom.focus(); }
+      closeBtn.onclick = closeModal;
+      function onZoomKey(ev) {
+        if (ev.key === 'Escape') { closeModal(); return; }
+        if (ev.key === 'Tab') {
+          // Trap focus within modal (only closeBtn is focusable)
+          ev.preventDefault(); closeBtn.focus();
+        }
+      }
+      modal.addEventListener('click', function(ev) { if (ev.target === modal) closeModal(); });
+      document.addEventListener('keydown', onZoomKey);
       document.body.appendChild(modal);
+      closeBtn.focus();
     });
   })();
 
@@ -24088,7 +24988,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       if (s.se != null && isFinite(s.se)) return s.se;
       const lo = s.lowerCI, hi = s.upperCI;
       if (lo != null && hi != null) {
-        const zCrit = normalQuantile(1 - (1 - confLvl) / 2);
+        const zCrit = normalQuantile(0.975);  // Studies report 95% CIs
         return isRatio ? ((Math.log(hi) - Math.log(lo)) / (2 * zCrit)).toFixed(6) : ((hi - lo) / (2 * zCrit)).toFixed(6);
       }
       return 'np.nan';
@@ -24266,7 +25166,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       return;
     }
     const isRatio = nmaResult.isRatio;
-    const confLevel = nmaResult.confLevel || 0.95;
+    const confLevel = nmaResult.confLevel ?? 0.95;
     const confPct = Math.round(confLevel * 100);
     // Get unique comparisons (only i < j to avoid duplicates)
     const seen = new Set();
@@ -24294,6 +25194,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const hi = isRatio ? Math.exp(c.hi) : c.hi;
       allVals.push(ef, lo, hi);
     });
+    if (allVals.length === 0) return container.innerHTML = '<p class="text-muted">No comparisons to display.</p>';
     let xMin = Math.min(...allVals);
     let xMax = Math.max(...allVals);
     const xPad = (xMax - xMin) * 0.15 || 0.5;
@@ -24518,12 +25419,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
   function computeCINeMA(nmaResult, pairwiseResult, studies) {
     if (!nmaResult || !nmaResult.hatMatrix || !nmaResult.edges) return null;
-    var H = nmaResult.hatMatrix;
+    // CINeMA uses FE hat matrix per Krahn 2013 (contribution matrix); fall back to RE if FE unavailable
+    var H = nmaResult.hatMatrixFE ?? nmaResult.hatMatrix;
     var edges = nmaResult.edges;
     var nE = nmaResult.nE;
     var treatments = nmaResult.treatments;
-    var confLevel = nmaResult.confLevel || 0.95;
-    var zCrit = nmaResult.zCrit || normalQuantile(1 - (1 - confLevel) / 2);
+    var confLevel = nmaResult.confLevel ?? 0.95;
+    var zCrit = nmaResult.zCrit ?? normalQuantile(1 - (1 - confLevel) / 2);
 
     // User-configurable clinical decision threshold
     var thresholdInput = parseFloat(document.getElementById('cinemaThreshold')?.value);
@@ -24583,18 +25485,24 @@ body.dark-mode .input-error { background: #451a1a !important; }
       comp.domains.withinStudyBias = aggRob < 0.5 ? 'no' : aggRob < 1.2 ? 'some' : 'major';
 
       // Domain 2: Across-study bias (reporting bias)
+      // Per-edge Egger test where k >= 10 (Chaimani 2013); fall back to k-based concern
       var reportingBiasScore = 0;
-      var pEggerGlobal = pairwiseResult ? pairwiseResult.pEgger : null;
       for (var rj = 0; rj < nE; rj++) {
         var rw = H[i] ? (H[i][rj] || 0) : 0;
         if (rw < 0.001) continue;
-        var edgeK = (edges[rj].studies || []).length;
+        var edgeStudies = (edges[rj].studies || []).filter(function(s) { return s.se > 0; });
+        var edgeK = edgeStudies.length;
         if (edgeK < 3) {
-          reportingBiasScore += rw * 1;
-        } else if (pEggerGlobal != null && pEggerGlobal < 0.05) {
-          reportingBiasScore += rw * 2;
-        } else if (pEggerGlobal != null && pEggerGlobal < 0.10) {
-          reportingBiasScore += rw * 1;
+          reportingBiasScore += rw * 1;  // too few studies to assess
+        } else if (edgeK >= 10) {
+          // Per-edge asymmetry test: Peters for ratio measures, Egger for others (Cochrane ch.13)
+          var edgeSR = edgeStudies.map(function(s) { return { yi: s.directedEffect, sei: s.se, wi: 1/(s.se*s.se) }; });
+          var edgeResult = { k: edgeK, studyResults: edgeSR, isRatio: nmaResult.isRatio };
+          var edgeTest = nmaResult.isRatio ? petersTest(edgeResult) : eggersTest(edgeResult);
+          if (edgeTest && edgeTest.pValue < 0.05) reportingBiasScore += rw * 2;
+          else if (edgeTest && edgeTest.pValue < 0.10) reportingBiasScore += rw * 1;
+        } else {
+          reportingBiasScore += rw * 0.5;  // 3-9 studies: mild concern
         }
       }
       comp.domains.acrossStudyBias = reportingBiasScore < 0.5 ? 'no' :
@@ -24606,8 +25514,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
         directProportion > 0.4 ? 'some' : 'major';
 
       // Domain 4: Imprecision — CI width relative to configurable threshold
-      var se = e.se || 0;
-      var effect = e.effectEstimate || 0;
+      // Use NMA-estimated SE (borrows indirect evidence) rather than direct-only edge SE
+      var nmaEntry = nmaResult.leagueTable ? nmaResult.leagueTable.find(function(l) { return (l.t1 === e.t1 && l.t2 === e.t2) || (l.t1 === e.t2 && l.t2 === e.t1); }) : null;
+      var se = (nmaEntry ? nmaEntry.se : e.se) || 0;
+      var effect = (nmaEntry ? nmaEntry.effect : e.effectEstimate) || 0;
       var ciWidth = 2 * zCrit * se;
       comp.domains.imprecision = ciWidth < threshold ? 'no' :
         ciWidth < threshold * 2 ? 'some' : 'major';
@@ -24623,7 +25533,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       // Check if PI crosses both null AND clinical threshold boundaries
       var piCrossesNull = piLo <= 0 && piHi >= 0;
       var piCrossesThreshold = piLo <= -threshold && piHi >= threshold;
-      comp.domains.heterogeneity = tau2 < 0.001 ? 'no' :
+      var globalI2 = nmaResult.I2global ?? 0;
+      comp.domains.heterogeneity = (globalI2 < 25 && !piCrossesNull) ? 'no' :
         piCrossesThreshold ? 'major' : piCrossesNull ? 'some' : 'no';
 
       // Domain 6: Incoherence — per-comparison node-splitting p-value (Nikolakopoulou 2020)
@@ -24641,13 +25552,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
       comp.domains.incoherence = pInc == null ? 'no' :
         pInc < 0.05 ? 'major' : pInc < 0.10 ? 'some' : 'no';
 
-      // Overall confidence (CINeMA 3 summarization rules — using selected rule)
+      // Overall confidence (CINeMA summarization — Nikolakopoulou 2020 Table 2)
       var domainValues = Object.values(comp.domains);
       var majorCount = domainValues.filter(function(d) { return d === 'major'; }).length;
       var someCount = domainValues.filter(function(d) { return d === 'some'; }).length;
       comp.overall = majorCount >= 2 ? 'Very Low' :
         majorCount === 1 ? 'Low' :
-        someCount >= 2 ? 'Moderate' : 'High';
+        someCount >= 3 ? 'Low' :  // 3+ "some concern" domains → Low per CINeMA Appendix A
+        someCount >= 1 ? 'Moderate' : 'High';
 
       comparisons.push(comp);
     }
@@ -24815,23 +25727,27 @@ body.dark-mode .input-error { background: #451a1a !important; }
     // Helper: smart tick formatting
     function fmtVal(v) { return Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 1 ? v.toFixed(2) : v.toFixed(3); }
 
-    // Compute ESS per parameter (bulk ESS via autocorrelation)
+    // Compute ESS per parameter (bulk ESS via per-chain autocorrelation, then sum)
     function computeESS(chainVals) {
-      var all = chainVals.flat();
-      var n = all.length;
-      if (n < 10) return n;
-      var mean = all.reduce(function(a, b) { return a + b; }, 0) / n;
-      var v0 = all.reduce(function(a, b) { return a + (b - mean) * (b - mean); }, 0) / n;
-      if (v0 < 1e-15) return n;
-      var rhoSum = 0;
-      for (var lag = 1; lag < Math.min(n / 2, 500); lag++) {
-        var c = 0;
-        for (var i = 0; i < n - lag; i++) c += (all[i] - mean) * (all[i + lag] - mean);
-        var rho = c / (n * v0);
-        if (rho < 0.05) break;
-        rhoSum += rho;
+      var totalESS = 0;
+      for (var ci = 0; ci < chainVals.length; ci++) {
+        var chain = chainVals[ci];
+        var n = chain.length;
+        if (n < 10) { totalESS += n; continue; }
+        var mean = chain.reduce(function(a, b) { return a + b; }, 0) / n;
+        var v0 = chain.reduce(function(a, b) { return a + (b - mean) * (b - mean); }, 0) / n;
+        if (v0 < 1e-15) { totalESS += n; continue; }
+        var rhoSum = 0;
+        for (var lag = 1; lag < Math.min(n / 2, 500); lag++) {
+          var c = 0;
+          for (var i = 0; i < n - lag; i++) c += (chain[i] - mean) * (chain[i + lag] - mean);
+          var rho = c / (n * v0);
+          if (rho < 0.05) break;
+          rhoSum += rho;
+        }
+        totalESS += Math.round(n / (1 + 2 * rhoSum));
       }
-      return Math.round(n / (1 + 2 * rhoSum));
+      return totalESS;
     }
 
     for (var pi = 0; pi < maxParams; pi++) {
@@ -25126,7 +26042,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       }
       var displayLabel = s.label || s.key;
       html += '<button style="padding:3px 8px;font-size:0.75rem;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;background:' + bgColor + ';color:' + textColor + '" ' +
-        'onclick="_toggleInteractiveSensStudy(\'' + escapeHtml(s.key.replace(/'/g, "\\'")) + '\')" ' +
+        'onclick="_toggleInteractiveSensStudy(' + escapeHtml(JSON.stringify(s.key)) + ')" ' +
         'title="' + escapeHtml(displayLabel + ' (' + s.t1 + ' vs ' + s.t2 + ')') + '">' + robBadge + escapeHtml(displayLabel.length > 20 ? displayLabel.slice(0, 18) + '..' : displayLabel) +
         (s.excluded ? ' \u2717' : '') + '</button>';
     }
@@ -25164,8 +26080,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
     if (_sheetJSLoaded && window.XLSX) { callback(); return; }
     var script = document.createElement('script');
     script.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+    script.crossOrigin = 'anonymous';
     script.onload = function() { _sheetJSLoaded = true; callback(); };
-    script.onerror = function() { showToast('Failed to load SheetJS library. Check internet connection.', 'danger'); };
+    script.onerror = function() { showToast('Failed to load SheetJS library. Check internet connection or SRI mismatch.', 'danger'); };
     document.head.appendChild(script);
   }
 
@@ -25203,10 +26120,23 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
   function _showExcelPreview(workbook, fileName) {
     var sheets = workbook.SheetNames;
+    var _xlsPrevFocus = document.activeElement;
     var overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Excel Import Preview: ' + fileName);
     var modal = document.createElement('div');
     modal.style.cssText = 'background:var(--bg-card,#fff);border-radius:8px;padding:20px;max-width:800px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,0.3)';
+    function _xlsClose() { overlay.remove(); document.removeEventListener('keydown', _xlsKey); if (_xlsPrevFocus) _xlsPrevFocus.focus(); }
+    function _xlsKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); _xlsClose(); }
+      else if (e.key === 'Tab') {
+        var focs = overlay.querySelectorAll('button, select, input, [tabindex]:not([tabindex="-1"])');
+        if (focs.length > 0) { var f = focs[0], l = focs[focs.length - 1]; if (e.shiftKey && document.activeElement === f) { e.preventDefault(); l.focus(); } else if (!e.shiftKey && document.activeElement === l) { e.preventDefault(); f.focus(); } }
+      }
+    }
+    document.addEventListener('keydown', _xlsKey);
     var html = '<h3 style="margin:0 0 10px;font-size:1rem">Excel Import Preview: ' + escapeHtml(fileName) + '</h3>';
     // Sheet selector
     if (sheets.length > 1) {
@@ -25220,14 +26150,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
     html += '<div id="_xlsxPreviewBody"></div>';
     html += '<div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">';
-    html += '<button class="btn-outline" onclick="this.closest(\'div[style*=fixed]\').remove()">Cancel</button>';
-    html += '<button class="btn-success" onclick="window._xlsxConfirmImport();this.closest(\'div[style*=fixed]\').remove()">Import</button>';
+    html += '<button class="btn-outline" onclick="window._xlsxClosePreview()">Cancel</button>';
+    html += '<button class="btn-success" onclick="window._xlsxConfirmImport();window._xlsxClosePreview()">Import</button>';
     html += '</div>';
     modal.innerHTML = html;
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-    // Store workbook reference
+    // Focus first interactive element inside modal
+    var _firstBtn = modal.querySelector('button, select, input');
+    if (_firstBtn) _firstBtn.focus();
+
+    // Store workbook reference and close handler
+    window._xlsxClosePreview = _xlsClose;
     window._xlsxWorkbook = workbook;
 
     window._xlsxPreviewSheet = function() {
@@ -25351,7 +26286,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       rss += wArr[i] * resid * resid;
     }
     var mse = rss / Math.max(1, n - 2);
-    var seIntercept = Math.sqrt(mse / sw);
+    var seDenom = sw * swxx - swx * swx;
+    var seIntercept = Math.sqrt(mse * swxx / (Math.abs(seDenom) > 1e-15 ? seDenom : 1e-15));
     var df = n - 2;
     var tStat = seIntercept > 0 ? intercept / seIntercept : 0;
     var pValue = df > 0 ? 2 * (1 - tCDFfn(Math.abs(tStat), df)) : 1;
@@ -25591,7 +26527,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       for (var j = 0; j < nC; j++) beta[i] += CTCinv[i][j] * CTWy[j];
     }
 
-    var confLevel = nmaResult.confLevel || 0.95;
+    var confLevel = nmaResult.confLevel ?? 0.95;
     var df = Math.max(1, nE - nC);
     var tCrit = df >= 120 ? normalQuantile(1 - (1 - confLevel) / 2) : tQuantile(1 - (1 - confLevel) / 2, df);
     var results = [];
