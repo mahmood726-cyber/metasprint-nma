@@ -15,6 +15,7 @@
   --info: #6366f1;
   --bg: #f8fafc;
   --surface: #ffffff;
+  --surface-alt: #f1f5f9;
   --text: #1e293b;
   --text-muted: #4b5563;
   --border: #e2e8f0;
@@ -456,7 +457,7 @@ button:hover { background: var(--primary-hover); }
 /* --- Dark Mode: auto-detect system preference (WCAG 1.4.1) --- */
 @media (prefers-color-scheme: dark) {
   body:not(.light-forced) {
-    --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0;
+    --bg: #0f172a; --surface: #1e293b; --surface-alt: #273449; --text: #e2e8f0;
     --text-muted: #bdc8d6; --border: #334155;
     --primary: #3b82f6; --primary-hover: #2563eb;
     --success: #10b981; --warning: #d97706; --danger: #ef4444;
@@ -472,7 +473,7 @@ button:hover { background: var(--primary-hover); }
 
 /* --- Dark Mode: manual toggle --- */
 body.dark-mode {
-  --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0;
+  --bg: #0f172a; --surface: #1e293b; --surface-alt: #273449; --text: #e2e8f0;
   --text-muted: #bdc8d6; --border: #334155;
   --primary: #3b82f6; --primary-hover: #2563eb;
   --success: #10b981; --warning: #d97706; --danger: #ef4444;
@@ -1560,10 +1561,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
       <div id="contributionMatrixContainer" style="margin-top:20px"></div>
       <div id="robContributionContainer" style="margin-top:20px"></div>
       <div id="cinemaContainer" style="margin-top:20px"></div>
-      <div id="componentNMAContainer" style="margin-top:20px"></div>
+      <div style="margin-top:20px">
+        <label style="font-size:0.8rem;margin-right:8px">Component separator: <input id="componentSeparator" type="text" value="+" style="width:40px;text-align:center;font-size:0.8rem;padding:2px 4px" title="Character used to split multi-component treatment names (e.g. + or &amp;)"></label>
+      </div>
+      <div id="componentNMAContainer" style="margin-top:8px"></div>
       <div id="componentContainer" style="margin-top:20px"></div>
       <div id="looContainer" style="margin-top:20px"></div>
       <div id="nmaLooContainer" style="margin-top:20px"></div>
+      <div id="nmaBatteryContainer" style="margin-top:20px"></div>
       <div id="nmaSensitivityContainer" style="margin-top:20px"></div>
       <div id="nmaMetaRegContainer" style="margin-top:20px"></div>
       <div id="eggerContainer" style="margin-top:12px"></div>
@@ -1609,25 +1614,25 @@ body.dark-mode .input-error { background: #451a1a !important; }
       <h2>Evidence Insights</h2>
       <p class="text-muted" style="margin-bottom:12px">Deep evidence analysis inspired by Quranic epistemological principles. Select a sub-tab to explore.</p>
       <div class="insights-nav" role="tablist" aria-label="Insight sub-tabs">
-        <button class="insights-tab active" data-insight="tawakkul" role="tab" aria-selected="true" title="Trust Decomposition: 8-axis radar of evidence trustworthiness">Tawakkul</button>
-        <button class="insights-tab" data-insight="mizan" role="tab" aria-selected="false" title="Harm-Benefit Equipoise: Balance-scale visualization">Mizan</button>
-        <button class="insights-tab" data-insight="shura" role="tab" aria-selected="false" title="Multiverse Specification Curve: Sensitivity to analytic choices">Shura</button>
-        <button class="insights-tab" data-insight="hikmah" role="tab" aria-selected="false" title="Clinical Decision Context: Personalized NNT calculator">Hikmah</button>
-        <button class="insights-tab" data-insight="fitrah" role="tab" aria-selected="false" title="Natural Query Interface: Ask questions in plain language">Fitrah</button>
-        <button class="insights-tab" data-insight="ihsan" role="tab" aria-selected="false" title="Excellence Visualization: Icon arrays, quantile dots, timelines">Ihsan</button>
-        <button class="insights-tab" data-insight="amanah" role="tab" aria-selected="false" title="Evidence Gap Registry: Structured gap accountability">Amanah</button>
-        <button class="insights-tab" data-insight="taqwa" role="tab" aria-selected="false" title="Integrity Sentinel: GRIM test, retraction checks, funding bias">Taqwa</button>
-        <button class="insights-tab" data-insight="dhulm" role="tab" aria-selected="false" title="Health Equity Detector: Representation justice analysis">Dhulm</button>
-        <button class="insights-tab" data-insight="rahma" role="tab" aria-selected="false" title="Patient-Facing Translation: Plain-language summaries">Rahma</button>
-        <button class="insights-tab" data-insight="tabayyun" role="tab" aria-selected="false" title="Verification Engine: Cross-source verification states (49:6)">Tabayyun</button>
-        <button class="insights-tab" data-insight="living" role="tab" aria-selected="false" title="Living Evidence: Currency tracking, update triggers, version deltas">Living</button>
-        <button class="insights-tab" data-insight="conflict" role="tab" aria-selected="false" title="Conflict Detector: Contradictory outcomes across sources">Conflicts</button>
-        <button class="insights-tab" data-insight="radar" role="tab" aria-selected="false" title="Opportunity Radar: New evidence since last meta-analysis">Radar</button>
-        <button class="insights-tab" data-insight="registry" role="tab" aria-selected="false" title="Registry Graph: NCT/PMID/DOI canonical record linking">Registry</button>
+        <button class="insights-tab active" id="tab-insight-tawakkul" data-insight="tawakkul" role="tab" aria-selected="true" aria-controls="insight-tawakkul" title="Trust Decomposition: 8-axis radar of evidence trustworthiness">Tawakkul</button>
+        <button class="insights-tab" id="tab-insight-mizan" data-insight="mizan" role="tab" aria-selected="false" aria-controls="insight-mizan" title="Harm-Benefit Equipoise: Balance-scale visualization">Mizan</button>
+        <button class="insights-tab" id="tab-insight-shura" data-insight="shura" role="tab" aria-selected="false" aria-controls="insight-shura" title="Multiverse Specification Curve: Sensitivity to analytic choices">Shura</button>
+        <button class="insights-tab" id="tab-insight-hikmah" data-insight="hikmah" role="tab" aria-selected="false" aria-controls="insight-hikmah" title="Clinical Decision Context: Personalized NNT calculator">Hikmah</button>
+        <button class="insights-tab" id="tab-insight-fitrah" data-insight="fitrah" role="tab" aria-selected="false" aria-controls="insight-fitrah" title="Natural Query Interface: Ask questions in plain language">Fitrah</button>
+        <button class="insights-tab" id="tab-insight-ihsan" data-insight="ihsan" role="tab" aria-selected="false" aria-controls="insight-ihsan" title="Excellence Visualization: Icon arrays, quantile dots, timelines">Ihsan</button>
+        <button class="insights-tab" id="tab-insight-amanah" data-insight="amanah" role="tab" aria-selected="false" aria-controls="insight-amanah" title="Evidence Gap Registry: Structured gap accountability">Amanah</button>
+        <button class="insights-tab" id="tab-insight-taqwa" data-insight="taqwa" role="tab" aria-selected="false" aria-controls="insight-taqwa" title="Integrity Sentinel: GRIM test, retraction checks, funding bias">Taqwa</button>
+        <button class="insights-tab" id="tab-insight-dhulm" data-insight="dhulm" role="tab" aria-selected="false" aria-controls="insight-dhulm" title="Health Equity Detector: Representation justice analysis">Dhulm</button>
+        <button class="insights-tab" id="tab-insight-rahma" data-insight="rahma" role="tab" aria-selected="false" aria-controls="insight-rahma" title="Patient-Facing Translation: Plain-language summaries">Rahma</button>
+        <button class="insights-tab" id="tab-insight-tabayyun" data-insight="tabayyun" role="tab" aria-selected="false" aria-controls="insight-tabayyun" title="Verification Engine: Cross-source verification states (49:6)">Tabayyun</button>
+        <button class="insights-tab" id="tab-insight-living" data-insight="living" role="tab" aria-selected="false" aria-controls="insight-living" title="Living Evidence: Currency tracking, update triggers, version deltas">Living</button>
+        <button class="insights-tab" id="tab-insight-conflict" data-insight="conflict" role="tab" aria-selected="false" aria-controls="insight-conflict" title="Conflict Detector: Contradictory outcomes across sources">Conflicts</button>
+        <button class="insights-tab" id="tab-insight-radar" data-insight="radar" role="tab" aria-selected="false" aria-controls="insight-radar" title="Opportunity Radar: New evidence since last meta-analysis">Radar</button>
+        <button class="insights-tab" id="tab-insight-registry" data-insight="registry" role="tab" aria-selected="false" aria-controls="insight-registry" title="Registry Graph: NCT/PMID/DOI canonical record linking">Registry</button>
       </div>
 
       <!-- Tawakkul: Trust Decomposition -->
-      <div class="insight-panel active" id="insight-tawakkul">
+      <div class="insight-panel active" id="insight-tawakkul" role="tabpanel" aria-labelledby="tab-insight-tawakkul">
         <h3>Tawakkul — Trust Decomposition</h3>
         <p class="text-muted" style="margin-bottom:10px">8-axis radar showing trustworthiness dimensions of the current evidence base. Each axis maps to a GRADE or methodological quality domain.</p>
         <div id="tawakkulNoData" class="placeholder" style="display:none">Run an analysis first (Analyze tab) to see trust decomposition.</div>
@@ -1641,7 +1646,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Mizan: Harm-Benefit Equipoise -->
-      <div class="insight-panel" id="insight-mizan">
+      <div class="insight-panel" id="insight-mizan" role="tabpanel" aria-labelledby="tab-insight-mizan">
         <h3>Mizan — Harm-Benefit Equipoise</h3>
         <p class="text-muted" style="margin-bottom:10px">Balance-scale visualization weighing benefits against harms for the pooled intervention.</p>
         <div id="mizanNoData" class="placeholder" style="display:none">Extract study data with both efficacy and safety outcomes to see the balance.</div>
@@ -1653,7 +1658,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Shura: Multiverse Specification Curve -->
-      <div class="insight-panel" id="insight-shura">
+      <div class="insight-panel" id="insight-shura" role="tabpanel" aria-labelledby="tab-insight-shura">
         <h3>Shura — Multiverse Specification Curve</h3>
         <p class="text-muted" style="margin-bottom:10px">How sensitive are results to analytic choices? Runs all permutations of model, estimator, and adjustments.</p>
         <div id="shuraNoData" class="placeholder" style="display:none">Need at least 3 studies in the Analyze tab to run multiverse analysis.</div>
@@ -1667,7 +1672,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Hikmah: Clinical Decision Context -->
-      <div class="insight-panel" id="insight-hikmah">
+      <div class="insight-panel" id="insight-hikmah" role="tabpanel" aria-labelledby="tab-insight-hikmah">
         <h3>Hikmah — Clinical Decision Context</h3>
         <p class="text-muted" style="margin-bottom:10px">Personalized NNT/NNH calculator. Enter patient baseline risk to see individualized treatment effects.</p>
         <div id="hikmahNoData" class="placeholder" style="display:none">Run an analysis with binary outcomes (OR/RR/HR) to use the NNT calculator.</div>
@@ -1690,7 +1695,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Fitrah: Natural Query Interface -->
-      <div class="insight-panel" id="insight-fitrah">
+      <div class="insight-panel" id="insight-fitrah" role="tabpanel" aria-labelledby="tab-insight-fitrah">
         <h3>Fitrah — Natural Query Interface</h3>
         <p class="text-muted" style="margin-bottom:10px">Ask questions about your evidence in plain language.</p>
         <div style="display:flex;gap:8px;margin-bottom:16px">
@@ -1704,7 +1709,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Ihsan: Excellence Visualization -->
-      <div class="insight-panel" id="insight-ihsan">
+      <div class="insight-panel" id="insight-ihsan" role="tabpanel" aria-labelledby="tab-insight-ihsan">
         <h3>Ihsan — Excellence in Uncertainty Communication</h3>
         <p class="text-muted" style="margin-bottom:10px">Quantile dot plots and icon arrays that convey uncertainty more intuitively than confidence intervals alone.</p>
         <div id="ihsanNoData" class="placeholder" style="display:none">Run an analysis first to see uncertainty visualizations.</div>
@@ -1729,7 +1734,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Amanah: Evidence Gap Registry -->
-      <div class="insight-panel" id="insight-amanah">
+      <div class="insight-panel" id="insight-amanah" role="tabpanel" aria-labelledby="tab-insight-amanah">
         <h3>Amanah — Evidence Gap Accountability</h3>
         <p class="text-muted" style="margin-bottom:10px">Structured registry of what evidence is missing. Gaps scored by disease burden, feasibility, and equity impact.</p>
         <div id="amanahNoData" class="placeholder" style="display:none">Load trial universe data (Discover tab) to identify evidence gaps.</div>
@@ -1741,7 +1746,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Taqwa: Integrity Sentinel -->
-      <div class="insight-panel" id="insight-taqwa">
+      <div class="insight-panel" id="insight-taqwa" role="tabpanel" aria-labelledby="tab-insight-taqwa">
         <h3>Taqwa — Integrity Sentinel</h3>
         <p class="text-muted" style="margin-bottom:10px">Automated checks for statistical integrity: GRIM test (granularity), sample size consistency, and funding bias indicators.</p>
         <div id="taqwaNoData" class="placeholder" style="display:none">Extract study data first to run integrity checks.</div>
@@ -1752,7 +1757,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Dhulm: Health Equity Detector -->
-      <div class="insight-panel" id="insight-dhulm">
+      <div class="insight-panel" id="insight-dhulm" role="tabpanel" aria-labelledby="tab-insight-dhulm">
         <h3>Dhulm — Health Equity Detector</h3>
         <p class="text-muted" style="margin-bottom:10px">Assesses whether the evidence base represents the populations who bear the disease burden.</p>
         <div id="dhulmNoData" class="placeholder" style="display:none">Load trial universe or extract study data to assess equity.</div>
@@ -1765,7 +1770,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Rahma: Patient-Facing Translation -->
-      <div class="insight-panel" id="insight-rahma">
+      <div class="insight-panel" id="insight-rahma" role="tabpanel" aria-labelledby="tab-insight-rahma">
         <h3>Rahma — Patient-Facing Translation</h3>
         <p class="text-muted" style="margin-bottom:10px">Generates plain-language summaries at 8th-grade reading level. Designed for shared decision-making.</p>
         <div id="rahmaNoData" class="placeholder" style="display:none">Run an analysis first to generate a patient-facing summary.</div>
@@ -1783,7 +1788,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Tabayyun: Verification Engine (49:6) -->
-      <div class="insight-panel" id="insight-tabayyun">
+      <div class="insight-panel" id="insight-tabayyun" role="tabpanel" aria-labelledby="tab-insight-tabayyun">
         <h3>Tabayyun — Verification Engine</h3>
         <p class="text-muted" style="margin-bottom:10px">Quran 49:6: "Verify before acting." Every evidence claim gets a cross-source verification state. No insight is trusted unless corroborated by 2+ independent sources.</p>
         <div id="tabayyunNoData" class="placeholder" style="display:none">Load universe data or extract studies to see verification states.</div>
@@ -1795,7 +1800,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Living Evidence Mode -->
-      <div class="insight-panel" id="insight-living">
+      <div class="insight-panel" id="insight-living" role="tabpanel" aria-labelledby="tab-insight-living">
         <h3>Living Evidence Mode</h3>
         <p class="text-muted" style="margin-bottom:10px">PRISMA-LSR compliant currency tracking. Shows when evidence was last verified, what changed, and what needs updating.</p>
         <div id="livingNoData" class="placeholder" style="display:none">Load universe data to enable living evidence tracking.</div>
@@ -1810,7 +1815,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Conflict Detector -->
-      <div class="insight-panel" id="insight-conflict">
+      <div class="insight-panel" id="insight-conflict" role="tabpanel" aria-labelledby="tab-insight-conflict">
         <h3>Conflict Detector</h3>
         <p class="text-muted" style="margin-bottom:10px">Identifies contradictory outcomes across different sources, study updates, or time periods within the evidence base.</p>
         <div id="conflictNoData" class="placeholder" style="display:none">Run an analysis or load Al-Burhan data to detect conflicts.</div>
@@ -1821,7 +1826,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Opportunity Radar -->
-      <div class="insight-panel" id="insight-radar">
+      <div class="insight-panel" id="insight-radar" role="tabpanel" aria-labelledby="tab-insight-radar">
         <h3>Opportunity Radar — New Since Last MA</h3>
         <p class="text-muted" style="margin-bottom:10px">Identifies drug-outcome pairs where new trials have emerged since the last published meta-analysis, creating opportunities for updated reviews.</p>
         <div id="radarNoData" class="placeholder" style="display:none">Load universe data to scan for new evidence opportunities.</div>
@@ -1832,7 +1837,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       </div>
 
       <!-- Registry Graph -->
-      <div class="insight-panel" id="insight-registry">
+      <div class="insight-panel" id="insight-registry" role="tabpanel" aria-labelledby="tab-insight-registry">
         <h3>Registry Graph — Canonical Record Linking</h3>
         <p class="text-muted" style="margin-bottom:10px">Links NCT IDs, PMIDs, and DOIs into unified canonical records. Detects duplicate registrations and publication-registration mismatches.</p>
         <div id="registryNoData" class="placeholder" style="display:none">Load universe data or extract studies to build the registry graph.</div>
@@ -3560,7 +3565,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
   function _memCount(sn) { return Promise.resolve((_memStore[sn]||[]).length); }
   function _memBatchPut(sn, recs) { for(const r of recs) _memPut(sn,r); return Promise.resolve(); }
   function _showFallbackWarning() { if(!_idbFallbackWarned){ _idbFallbackWarned=true; setTimeout(()=>showToast('Storage unavailable \u2014 data will not persist after closing this tab','warning',6000),100); } }
-  function _detectIDB() { return new Promise(resolve=>{ try{ if(typeof indexedDB==='undefined'){_idbAvailable=false;resolve();return;} const t=indexedDB.open('__test_idb'); t.onerror=()=>{_idbAvailable=false;resolve();}; t.onsuccess=(e)=>{try{e.target.result.close();indexedDB.deleteDatabase('__test_idb');}catch(_){} resolve();}; }catch(e){_idbAvailable=false;resolve();} }); }
+  function _detectIDB() { return new Promise(resolve=>{ try{ if(typeof indexedDB==='undefined'){_idbAvailable=false;resolve();return;} const t=indexedDB.open('__test_idb'); t.onerror=()=>{_idbAvailable=false;resolve();}; t.onsuccess=(e)=>{try{e.target.result.close();indexedDB.deleteDatabase('__test_idb');}catch(ce){msaLog('debug','idb','Test DB cleanup:',ce.message);} resolve();}; }catch(e){_idbAvailable=false;resolve();} }); }
 
   function initDB() {
     return new Promise((resolve, reject) => {
@@ -3635,7 +3640,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         _quotaWarned = true;
         showToast('Storage nearly full (' + Math.round(est.usage / est.quota * 100) + '%). Consider exporting and clearing old projects.', 'warning');
       }
-    } catch (_) { /* ignore */ }
+    } catch (sqe) { msaLog('debug', 'storage', 'Quota check unavailable:', sqe.message); }
   }
 
   // Helper: wrap IDB transaction in a promise
@@ -6781,15 +6786,22 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // --- SE back-calculation from p-value ---
   // When CI is missing but effect + p-value are available: SE = |effect| / z
   // where z = normalQuantile(1 - p/2) for a two-sided test
-  function computeSEfromPvalue(effect, pValue, confLevel) {
+  function computeSEfromPvalue(effect, pValue, confLevel, effectType) {
     if (effect == null || pValue == null || !isFinite(effect) || !isFinite(pValue)) return null;
     if (pValue <= 0 || pValue >= 1) return null;
     var z = normalQuantile(1 - pValue / 2);
     if (!isFinite(z) || z <= 0) return null;
-    var se = Math.abs(effect) / z;
+    var isRatioType = effectType === 'OR' || effectType === 'RR' || effectType === 'HR';
+    // For ratio measures, SE is on log scale: SE = |log(effect)| / z
+    var logEffect = isRatioType ? Math.log(effect) : effect;
+    if (!isFinite(logEffect)) return null;
+    var se = Math.abs(logEffect) / z;
     if (!isFinite(se) || se <= 0) return null;
-    // Also compute CI using the requested confidence level
+    // Compute CI using the requested confidence level
     var zConf = normalQuantile(1 - (1 - (confLevel ?? 0.95)) / 2);
+    if (isRatioType) {
+      return { se: se, lowerCI: Math.exp(logEffect - zConf * se), upperCI: Math.exp(logEffect + zConf * se) };
+    }
     return { se: se, lowerCI: effect - zConf * se, upperCI: effect + zConf * se };
   }
 
@@ -7067,7 +7079,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     };
     // Auto-compute CI from p-value if CI is missing
     if (study.effectEstimate != null && study.lowerCI == null && study.upperCI == null && study.pValue != null) {
-      var fromP = computeSEfromPvalue(study.effectEstimate, study.pValue, 0.95);
+      var fromP = computeSEfromPvalue(study.effectEstimate, study.pValue, 0.95, study.effectType);
       if (fromP) {
         study.se = Math.round(fromP.se * 10000) / 10000;
         study.lowerCI = Math.round(fromP.lowerCI * 10000) / 10000;
@@ -7118,7 +7130,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     if (extractedStudies.length > 0) {
       const ok = await showConfirm('Load Demo Data', 'This will replace your current ' + extractedStudies.length + ' studies with the demo dataset. Continue?');
       if (!ok) return;
-      extractedStudies.forEach(function(s) { idbDelete('studies', s.id).catch(function(){}); });
+      extractedStudies.forEach(function(s) { idbDelete('studies', s.id).catch(function(e) { msaLog('warn', 'idb', 'Failed to delete study ' + s.id + ': ' + (e?.message || e)); }); });
       extractedStudies.length = 0;
     }
     _insertDemoStudies();
@@ -7135,11 +7147,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
       { authorYear: 'Hollis 1991', treatment1: 'Self-Help', treatment2: 'Group Counseling', effectEstimate: 1.10, se: 0.441, effectType: 'OR' },
       { authorYear: 'Campbell 1991', treatment1: 'Individual Counseling', treatment2: 'Group Counseling', effectEstimate: 0.73, se: 0.394, effectType: 'OR' }
     ];
+    var demoConfLevel = parseFloat(document.getElementById('confLevelSelect')?.value) || 0.95;
+    var demoZ = normalQuantile(1 - (1 - demoConfLevel) / 2);
     demo.forEach(function(d) {
       // Convert OR to log OR for the internal engine
       var logOR = Math.log(d.effectEstimate);
-      var lCI = Math.exp(logOR - 1.96 * d.se);
-      var uCI = Math.exp(logOR + 1.96 * d.se);
+      var lCI = Math.exp(logOR - demoZ * d.se);
+      var uCI = Math.exp(logOR + demoZ * d.se);
       addStudyRow({
         authorYear: d.authorYear,
         treatment1: d.treatment1,
@@ -7634,7 +7648,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           const bundle = JSON.parse(ev.target.result);
           if (!bundle.version || !bundle.studies) throw new Error('Invalid project file');
           // Clear existing studies
-          extractedStudies.forEach(s => idbDelete('studies', s.id).catch(function(){}));
+          extractedStudies.forEach(s => idbDelete('studies', s.id).catch(e => msaLog('warn', 'idb', 'Failed to delete study ' + s.id + ': ' + (e?.message || e))));
           extractedStudies.length = 0;
           // Load studies
           for (const s of bundle.studies) {
@@ -7851,9 +7865,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
   function exportLeagueTableCSV() {
     if (!lastAnalysisResult?.leagueTable) { showToast('Run analysis first', 'warning'); return; }
+    const isRatio = lastAnalysisResult.isRatio;
     const rows = [['Treatment 1', 'Treatment 2', 'Effect', 'Lower CI', 'Upper CI']];
     for (const entry of lastAnalysisResult.leagueTable) {
-      rows.push([entry.t1, entry.t2, entry.effect?.toFixed(4), entry.lo?.toFixed(4), entry.hi?.toFixed(4)]);
+      const eff = isRatio ? Math.exp(entry.effect) : entry.effect;
+      const lo = isRatio ? Math.exp(entry.lo) : entry.lo;
+      const hi = isRatio ? Math.exp(entry.hi) : entry.hi;
+      rows.push([csvSafeCell(entry.t1), csvSafeCell(entry.t2), eff?.toFixed(4), lo?.toFixed(4), hi?.toFixed(4)]);
     }
     const csv = rows.map(r => r.join(',')).join('\n');
     downloadFile(csv, 'nma-league-table.csv', 'text/csv');
@@ -8006,11 +8024,12 @@ body.dark-mode .input-error { background: #451a1a !important; }
       leagueLookup[entry.t1 + '||' + entry.t2] = entry;
       // Also store reverse
       if (!leagueLookup[entry.t2 + '||' + entry.t1]) {
+        // League table stores effects on log scale for ratios, so reversing is always negation
         leagueLookup[entry.t2 + '||' + entry.t1] = {
           t1: entry.t2, t2: entry.t1,
-          effect: isRatio ? (1 / (entry.effect ?? 1)) : (-(entry.effect ?? 0)),
-          lo: isRatio ? (1 / (entry.hi ?? 1)) : (-(entry.hi ?? 0)),
-          hi: isRatio ? (1 / (entry.lo ?? 1)) : (-(entry.lo ?? 0))
+          effect: -(entry.effect ?? 0),
+          lo: -(entry.hi ?? 0),
+          hi: -(entry.lo ?? 0)
         };
       }
     }
@@ -8041,9 +8060,12 @@ body.dark-mode .input-error { background: #451a1a !important; }
         const baseGrade = basePooled ? computeGRADE(basePooled, extractedStudies) : null;
         const nmaGrade = baseGrade ? computeGRADE_NMA(baseGrade, nma, nodeSplits, key) : null;
 
-        const effect = entry ? (entry.effect?.toFixed(4) ?? '') : '';
-        const lo = entry ? (entry.lo?.toFixed(4) ?? '') : '';
-        const hi = entry ? (entry.hi?.toFixed(4) ?? '') : '';
+        const rawEff = entry ? entry.effect : null;
+        const rawLo = entry ? entry.lo : null;
+        const rawHi = entry ? entry.hi : null;
+        const effect = rawEff != null ? (isRatio ? Math.exp(rawEff) : rawEff).toFixed(4) : '';
+        const lo = rawLo != null ? (isRatio ? Math.exp(rawLo) : rawLo).toFixed(4) : '';
+        const hi = rawHi != null ? (isRatio ? Math.exp(rawHi) : rawHi).toFixed(4) : '';
         const dom = nmaGrade?.domains || {};
 
         rows.push([
@@ -8294,6 +8316,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
     const tau2Lo = Qgen(0) <= qHi ? 0 : solve(qHi, 0, 100);
     const tau2Hi = solve(qLo, 0, 100);
+    if (Math.abs(tau2Hi - 100) < 0.01) {
+      msaLog('warn', 'stats', 'Q-Profile CI upper bound hit search limit (tau2=100); true upper CI may be higher');
+    }
     return { tau2Lo, tau2Hi };
   }
 
@@ -8400,7 +8425,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const Qorig = ws.reduce((a, w, i) => a + w * (ys[i] - ybar) ** 2, 0);
     const R2tau = Qorig > 0 ? Math.max(0, 1 - Qres / Qorig) : 0;
 
-    return { intercept, slope, seSlope, tStat, pValue, R2tau, Qres, QE_pval, k };
+    return { intercept, slope, seSlope, tStat, pValue, R2tau, Qres, QE_pval, k, xbar, den };
   }
 
   // --- Meta-regression rendering (bubble plot + statistics) ---
@@ -8410,7 +8435,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     return m ? parseInt(m[1], 10) : null;
   }
 
-  function renderMetaRegression(studies, result, tau2) {
+  function renderMetaRegression(studies, result, tau2, confLevel) {
     const el = document.getElementById('metaRegressionContainer');
     if (!el) return;
     if (!result || !result.studyResults || result.studyResults.length < 3) {
@@ -8453,7 +8478,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
 
     // Store for moderator switching
-    window._metaRegState = { studyData, moderators, tau2, isRatio: result.isRatio };
+    window._metaRegState = { studyData, moderators, tau2, isRatio: result.isRatio, confLevel: confLevel ?? 0.95 };
 
     const modLabels = { year: 'Publication Year', sampleSize: 'Sample Size', precision: 'Precision (1/SE\u00B2)' };
     const options = Object.keys(moderators).map(m =>
@@ -8478,7 +8503,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
   function renderMetaRegPlot(mod) {
     const state = window._metaRegState;
     if (!state) return;
-    const { studyData, moderators, tau2, isRatio } = state;
+    const { studyData, moderators, tau2, isRatio, confLevel } = state;
     const modValues = moderators[mod];
     if (!modValues) return;
 
@@ -8565,14 +8590,16 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const ryMax = reg.intercept + reg.slope * rxMax;
     svg += '<line x1="' + sx(rxMin) + '" y1="' + sy(ryMin) + '" x2="' + sx(rxMax) + '" y2="' + sy(ryMax) + '" stroke="var(--primary)" stroke-width="2" opacity="0.8"/>';
 
-    // Confidence band (approximate: +/- 1.96*SE of fitted values)
+    // Confidence band (+/- zCrit*SE of fitted values)
+    const zCritBand = normalQuantile(1 - (1 - (confLevel ?? 0.95)) / 2);
     const nBand = 20;
     let bandUp = [], bandDown = [];
     for (let i = 0; i <= nBand; i++) {
       const xv = rxMin + (rxMax - rxMin) * i / nBand;
       const fitted = reg.intercept + reg.slope * xv;
-      const seFitted = reg.seSlope * Math.abs(xv - (pts.reduce((a, p) => a + p.x, 0) / pts.length));
-      const margin = 1.96 * Math.max(seFitted, reg.seSlope * 0.3);
+      const wxBar = reg.xbar ?? (pts.reduce((a, p) => a + p.x, 0) / pts.length);
+      const seFitted = reg.seSlope * Math.sqrt(1 / pts.length + (xv - wxBar) ** 2 / (reg.den ?? 1));
+      const margin = zCritBand * Math.max(seFitted, reg.seSlope * 0.3);
       bandUp.push(sx(xv) + ',' + sy(fitted + margin));
       bandDown.push(sx(xv) + ',' + sy(fitted - margin));
     }
@@ -8681,9 +8708,11 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // --- Galbraith (Radial) Plot: Outlier detection ---
   // x = precision (1/SE), y = standardized effect (yi/SE)
   // Ref: Galbraith RF. Statistics in Medicine 1988;7:889-894
-  function renderGalbraithPlot(studyResults, pooledTheta) {
+  function renderGalbraithPlot(studyResults, pooledTheta, confLevel) {
     const el = document.getElementById('galbraithContainer');
     if (!el || !studyResults || studyResults.length < 3) { if (el) el.innerHTML = ''; return; }
+    confLevel = confLevel ?? 0.95;
+    const zCrit = normalQuantile(1 - (1 - confLevel) / 2);
     const k = studyResults.length;
     const yi = studyResults.map(s => s.yi);
     const sei = studyResults.map(s => s.sei ?? Math.sqrt(s.vi));
@@ -8693,7 +8722,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const W = 520, H = 360, pad = { l: 60, r: 30, t: 30, b: 50 };
     const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
     const maxP = Math.max(...precision) * 1.15;
-    const allZ = [...zScores, 1.96 + pooledTheta * maxP, -1.96 + pooledTheta * maxP];
+    const allZ = [...zScores, zCrit + pooledTheta * maxP, -zCrit + pooledTheta * maxP];
     const minZ = Math.min(...allZ) * 1.1, maxZ = Math.max(...allZ) * 1.1;
     const zRange = maxZ - minZ || 1;
     const sx = x => pad.l + (x / maxP) * pw;
@@ -8705,18 +8734,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
     svg += '<text x="' + (pad.l + pw / 2) + '" y="' + (H - 8) + '" text-anchor="middle" fill="var(--text-muted)" font-size="11">Precision (1/SE)</text>';
     svg += '<text x="14" y="' + (pad.t + ph / 2) + '" text-anchor="middle" fill="var(--text-muted)" font-size="11" transform="rotate(-90,14,' + (pad.t + ph / 2) + ')">Standardized effect (z = yi/SE)</text>';
     svg += '<line x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(maxP) + '" y2="' + sy(pooledTheta * maxP) + '" stroke="var(--danger)" stroke-width="1.5"/>';
-    svg += '<line x1="' + sx(0) + '" y1="' + sy(1.96) + '" x2="' + sx(maxP) + '" y2="' + sy(1.96 + pooledTheta * maxP) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,4"/>';
-    svg += '<line x1="' + sx(0) + '" y1="' + sy(-1.96) + '" x2="' + sx(maxP) + '" y2="' + sy(-1.96 + pooledTheta * maxP) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,4"/>';
+    svg += '<line x1="' + sx(0) + '" y1="' + sy(zCrit) + '" x2="' + sx(maxP) + '" y2="' + sy(zCrit + pooledTheta * maxP) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,4"/>';
+    svg += '<line x1="' + sx(0) + '" y1="' + sy(-zCrit) + '" x2="' + sx(maxP) + '" y2="' + sy(-zCrit + pooledTheta * maxP) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,4"/>';
     svg += '<line x1="' + sx(0) + '" y1="' + sy(0) + '" x2="' + sx(maxP) + '" y2="' + sy(0) + '" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>';
     for (let i = 0; i < k; i++) {
       const cx = sx(precision[i]), cy = sy(zScores[i]);
       const expected = pooledTheta * precision[i];
-      const isOutlier = Math.abs(zScores[i] - expected) > 1.96;
+      const isOutlier = Math.abs(zScores[i] - expected) > zCrit;
       svg += '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="' + (isOutlier ? 'var(--danger)' : 'var(--accent)') + '" opacity="0.8"/>';
       svg += '<text x="' + (cx + 6) + '" y="' + (cy - 4) + '" fill="var(--text-primary)" font-size="10">' + escapeHtml(names[i]) + '</text>';
     }
     svg += '</svg>';
-    svg += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:4px">Points outside dashed bands (+/-1.96) are potential outliers. Red line = pooled effect. Ref: Galbraith 1988.</p>';
+    svg += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:4px">Points outside dashed bands (\u00B1' + zCrit.toFixed(2) + ' at ' + Math.round(confLevel * 100) + '% CL) are potential outliers. Red line = pooled effect. Ref: Galbraith 1988.</p>';
     el.innerHTML = svg;
   }
 
@@ -8743,7 +8772,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const hat = wiRE[i] / sumW;
       const residual = yi[i] - thetaFull;
       const stdResid = residual / Math.sqrt(vi[i] + tau2);
-      const studResid = (vi[i] + tau2 - varLOO) > 0 ? residual / Math.sqrt(vi[i] + tau2 - varLOO) : 0;
+      const studResidDenom = vi[i] + tau2 - varLOO;
+      const studResid = studResidDenom > 1e-15 ? residual / Math.sqrt(studResidDenom) : (Math.abs(residual) > 1e-15 ? Infinity * Math.sign(residual) : 0);
       const diff = thetaFull - thetaLOO;
       const cookD = (diff * diff) / varTheta;
       const dfbetas = diff / Math.sqrt(varLOO);
@@ -8817,7 +8847,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const ciExcludesNull = isRatio ? (ciLo > 1 || ciHi < 1) : (ciLo > 0 || ciHi < 0);
     let eCi = null;
     if (ciExcludesNull) {
-      eCi = effectType === 'OR' ? eValueRR(Math.sqrt(closerBound)) : eValueRR(closerBound);
+      if (effectType === 'SMD' || effectType === 'MD') {
+        eCi = eValueRR(Math.sqrt(Math.exp(Math.PI / Math.sqrt(3) * closerBound)));
+      } else if (effectType === 'OR') {
+        eCi = eValueRR(Math.sqrt(closerBound));
+      } else {
+        eCi = eValueRR(closerBound);
+      }
     }
     const interp = !isFinite(ePoint) ? 'Cannot compute E-value.' :
       ePoint < 1.5 ? 'Very weak: Even minimal unmeasured confounding could explain this effect.' :
@@ -8961,6 +8997,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
   function computeNMAMetaRegression(nmaResult, studies, moderatorType) {
     if (!nmaResult || !nmaResult.edges || !studies) return null;
     moderatorType = moderatorType || 'year';
+    const confLevel = nmaResult.confLevel ?? 0.95;
+    const zCritCI = normalQuantile(1 - (1 - confLevel) / 2);
 
     // Get moderator value for each study
     function getModeratorValue(study) {
@@ -8968,13 +9006,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
       if (moderatorType === 'sampleSize') return (study.nTotal ?? ((study.n1 ?? 0) + (study.n2 ?? 0))) || null;
       if (moderatorType === 'precision') {
         const se = study.se ?? (study.lowerCI != null && study.upperCI != null
-          ? (study.upperCI - study.lowerCI) / (2 * normalQuantile(0.975)) : null);
+          ? (study.upperCI - study.lowerCI) / (2 * zCritCI) : null);
         return se != null && se > 0 ? 1 / (se * se) : null;
       }
       return null;
     }
 
     // Build study-level data keyed by comparison
+    const isRatio = nmaResult.isRatio ?? false;
     const compData = new Map(); // key = "t1||t2" -> [{yi, vi, sei, moderator}]
     for (const s of studies) {
       const t1 = (s.treatment1 || '').trim(), t2 = (s.treatment2 || '').trim();
@@ -8982,12 +9021,15 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const mod = getModeratorValue(s);
       if (mod == null || !isFinite(mod)) continue;
       const se = s.se ?? (s.lowerCI != null && s.upperCI != null
-        ? (s.upperCI - s.lowerCI) / (2 * normalQuantile(0.975)) : null);
+        ? (s.upperCI - s.lowerCI) / (2 * zCritCI) : null);
       if (!se || se <= 0) continue;
       const key = t1 < t2 ? t1 + '||' + t2 : t2 + '||' + t1;
       const sign = t1 < t2 ? 1 : -1;
+      // For ratio measures: work on log scale (negation = reciprocal on natural scale)
+      const yi = isRatio ? Math.log(s.effectEstimate) * sign : s.effectEstimate * sign;
+      if (!isFinite(yi)) continue;
       if (!compData.has(key)) compData.set(key, []);
-      compData.get(key).push({ yi: s.effectEstimate * sign, vi: se * se, sei: se, mod });
+      compData.get(key).push({ yi, vi: se * se, sei: se, mod });
     }
 
     // For each comparison with k>=2 studies, compute within-comparison slope
@@ -9161,7 +9203,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
   }
 
   function renderNMASensitivityBattery(network, confLevel) {
-    const el = document.getElementById('nmaSensitivityContainer');
+    const el = document.getElementById('nmaBatteryContainer');
     if (!el) return;
     const battery = computeNMASensitivityBattery(network, confLevel);
     if (!battery || battery.length === 0) { el.innerHTML = ''; return; }
@@ -9174,7 +9216,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       '<th scope="col" style="padding:6px;text-align:right">I&sup2;</th>' +
       '<th scope="col" style="padding:6px;text-align:right">Q</th>' +
       '<th scope="col" style="padding:6px;text-align:left">Top Treatment</th>' +
-      '<th scope="col" style="padding:6px;text-align:right">P-score</th>' +
+      '<th scope="col" style="padding:6px;text-align:right" title="P-score (R\u00FCcker & Schwarzer 2015): probability that a treatment is better than a competitor, averaged over all competitors. Range 0\u20131, higher = better.">P-score</th>' +
       '</tr></thead><tbody>';
     const topTreats = new Set();
     for (const r of battery) {
@@ -9281,8 +9323,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
     domains.indirectness = 0;
     certainty += domains.indirectness;
 
-    // Upgrade: large effect (only for ratio measures per GRADE handbook)
-    if (certainty >= 3 && pooledResult.pooled != null && isRatio) {
+    // Upgrade: large effect (ratio measures per GRADE handbook; applies at any certainty level)
+    if (pooledResult.pooled != null && isRatio) {
       const effectMag = Math.abs(Math.log(pooledResult.pooled));
       if (effectMag > Math.log(5)) { domains.largeEffect = 2; certainty += 2; }
       else if (effectMag > Math.log(2)) { domains.largeEffect = 1; certainty += 1; }
@@ -9738,7 +9780,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
   }
 
   // HKSJ adjustment for NMA-level estimates
-  // Replaces zCrit with tCrit(df = nE - (nT-1)) in league table CIs
+  // Replaces zCrit with tCrit(df = nE - (nT-1)) and inflates SEs by sqrt(max(1, Q/df))
   function applyHKSJtoNMAResult(nmaResult) {
     if (!nmaResult || !nmaResult.leagueTable) return nmaResult;
     const { nE, nT, d, V, tau2, isRatio, confLevel } = nmaResult;
@@ -9747,16 +9789,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const alpha = 1 - confLevel;
     const tCrit = tQuantile(1 - alpha / 2, df);
 
-    // Rebuild league table with t-based CIs
+    // HKSJ q-factor: variance inflation from residual heterogeneity
+    const Qtotal = nmaResult.Qtotal ?? 0;
+    const qFactor = Math.sqrt(Math.max(1, Qtotal / df));
+
+    // Rebuild league table with q-inflated SEs and t-based CIs
     const newLeague = nmaResult.leagueTable.map(entry => {
       const dij = entry.effect;
-      const seij = entry.se;
-      const lo = dij - tCrit * seij;
-      const hi = dij + tCrit * seij;
-      const tStat = seij > 0 ? Math.abs(dij / seij) : 0;
-      const pVal = seij > 0 ? 2 * (1 - tCDFfn(tStat, df)) : 1;
-      // Prediction interval stays with its own t-distribution
-      return { ...entry, lo, hi, pValue: pVal };
+      const seHKSJ = entry.se * qFactor;
+      const lo = dij - tCrit * seHKSJ;
+      const hi = dij + tCrit * seHKSJ;
+      const tStat = seHKSJ > 0 ? Math.abs(dij / seHKSJ) : 0;
+      const pVal = seHKSJ > 0 ? 2 * (1 - tCDFfn(tStat, df)) : 1;
+      return { ...entry, se: seHKSJ, lo, hi, pValue: pVal };
     });
 
     return {
@@ -9764,7 +9809,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       leagueTable: newLeague,
       zCrit: tCrit, // replaced with tCrit
       tau2Method: (nmaResult.tau2Method || 'DL') + '+HKSJ',
-      hksjDf: df
+      hksjDf: df,
+      hksjQfactor: qFactor
     };
   }
 
@@ -10061,7 +10107,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       for (let row = col + 1; row < n; row++) {
         if (Math.abs(aug[row][col]) > maxVal) { maxVal = Math.abs(aug[row][col]); maxRow = row; }
       }
-      if (maxVal < 1e-15) continue;
+      if (maxVal < 1e-15) return null;
       if (maxRow !== col) { const tmp = aug[col]; aug[col] = aug[maxRow]; aug[maxRow] = tmp; }
       const pivot = aug[col][col];
       for (let j = 0; j < 2 * n; j++) aug[col][j] /= pivot;
@@ -10748,11 +10794,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
         }
 
         const tau2Old = tau2;
-        const logPOldT = logLik(d, tau2) + logPrior(d, tau2);
-        const proposal = tau2 + normalRand() * stepTau;
-        if (proposal > 0) {
+        // Propose on log(tau2) scale for better mixing near zero
+        const logTau2Old = Math.log(tau2 + 1e-15);
+        const logPOldT = logLik(d, tau2) + logPrior(d, tau2) + logTau2Old;
+        const logTau2Prop = logTau2Old + normalRand() * stepTau;
+        const proposal = Math.exp(logTau2Prop);
+        if (proposal > 0 && isFinite(proposal)) {
           tau2 = proposal;
-          const logPNewT = logLik(d, tau2) + logPrior(d, tau2);
+          const logPNewT = logLik(d, tau2) + logPrior(d, tau2) + logTau2Prop;
           totalTau++;
           if (Math.log(rng()) < logPNewT - logPOldT) {
             acceptTau++;
@@ -10811,7 +10860,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     for (let t = 0; t < nT; t++) {
       let meanRank = 0;
       for (let r = 0; r < nT; r++) meanRank += rankProbs[t][r] * (r + 1);
-      sucra[t] = (nT - meanRank) / (nT - 1);
+      sucra[t] = nT > 1 ? (nT - meanRank) / (nT - 1) : 1;
     }
 
     const tau2Vals = combined.map(s => s.tau2).sort((a, b) => a - b);
@@ -10836,6 +10885,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const varPlus = (1 - 1 / nSamples) * W_var + B_var / nSamples;
       rhat.push(W_var > 0 ? Math.sqrt(varPlus / W_var) : 1);
     }
+    // R-hat for tau2
+    const tau2ChainMeans = allSamples.map(ch => {
+      const vals = ch.map(s => s.tau2);
+      return vals.reduce((a, b) => a + b, 0) / vals.length;
+    });
+    const tau2GrandMean = tau2ChainMeans.reduce((a, b) => a + b, 0) / nChains;
+    const tau2B = nSamples / (nChains - 1) * tau2ChainMeans.reduce((a, m) => a + (m - tau2GrandMean) ** 2, 0);
+    const tau2W = allSamples.reduce((a, ch) => {
+      const mn = ch.map(s => s.tau2).reduce((a2, b) => a2 + b, 0) / ch.length;
+      return a + ch.map(s => s.tau2).reduce((s2, v) => s2 + (v - mn) ** 2, 0) / (ch.length - 1);
+    }, 0) / nChains;
+    const tau2VarPlus = (1 - 1 / nSamples) * tau2W + tau2B / nSamples;
+    const rhatTau2 = tau2W > 0 ? Math.sqrt(tau2VarPlus / tau2W) : 1;
 
     const leagueTable = [];
     for (let i = 0; i < nT; i++) {
@@ -10882,7 +10944,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
     return {
       dSummary, tau2Summary, tau2, d, V, sucra, rankProbs, leagueTable,
-      rhat, treatments, refTreatment: treatments[refIdx], refIdx,
+      rhat, rhatTau2, treatments, refTreatment: treatments[refIdx], refIdx,
       nChains, nWarmup, nSamples, nT, nE,
       edges: network.edges,
       confLevel, network, pscores: sucra, isRatio: network.isRatio,
@@ -10959,10 +11021,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const diff = directEffect - indirectEffect;
       const diffSE = Math.sqrt(directSE * directSE + indirectSE * indirectSE);
       const z = diffSE > 0 ? diff / diffSE : 0;
-      // B6: Use t-distribution for small-sample node-split (df = nStudies in direct comparison - 1)
-      const directStudyCount = edge.nStudies ?? 1;
-      const nodeSplitDf = Math.max(1, directStudyCount - 1);
-      const pValue = nodeSplitDf < 30 ? 2 * (1 - tCDFfn(Math.abs(z), nodeSplitDf)) : 2 * (1 - normalCDF(Math.abs(z)));
+      // Node-split Wald test: z follows standard normal under null (Dias et al. 2010)
+      const pValue = 2 * (1 - normalCDF(Math.abs(z)));
 
       // Network estimate from full NMA (if available)
       let networkEffect = (directEffect * (1/(directSE*directSE)) + indirectEffect * (1/(indirectSE*indirectSE))) / (1/(directSE*directSE) + 1/(indirectSE*indirectSE));
@@ -11057,13 +11117,16 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // ============================================================
 
   function computeContributionMatrix(nmaResult) {
+    // Papakonstantinou 2018: H = B(B'WB)^-1 B'W — rows sum to 1.
+    // Contribution = H[i][j] * 100 (percentage). Negative entries indicate
+    // opposing indirect evidence flow; we keep them as-is per the original method.
     const { hatMatrix, nE } = nmaResult;
     const contribution = matZeros(nE, nE);
     for (let i = 0; i < nE; i++) {
       let rowSum = 0;
-      for (let j = 0; j < nE; j++) rowSum += Math.abs(hatMatrix[i][j]);
+      for (let j = 0; j < nE; j++) rowSum += hatMatrix[i][j];
       for (let j = 0; j < nE; j++) {
-        contribution[i][j] = rowSum > 0 ? Math.abs(hatMatrix[i][j]) / rowSum * 100 : 0;
+        contribution[i][j] = rowSum > 0 ? hatMatrix[i][j] / rowSum * 100 : 0;
       }
     }
     return contribution;
@@ -11249,18 +11312,6 @@ body.dark-mode .input-error { background: #451a1a !important; }
         svg.querySelectorAll('circle[data-node-idx]').forEach(c => {
           c.style.opacity = connected.has(parseInt(c.dataset.nodeIdx)) ? '1' : '0.15';
         });
-        svg.querySelectorAll('line').forEach(line => {
-          // Check if this edge connects to the selected node
-          const x1 = parseFloat(line.getAttribute('x1')), y1 = parseFloat(line.getAttribute('y1'));
-          const x2 = parseFloat(line.getAttribute('x2')), y2 = parseFloat(line.getAttribute('y2'));
-          let isConnected = false;
-          if (nmaResult.edges) {
-            const nodePos = positions || [];
-            // Simple: highlight edge if it connects to highlighted node via index matching
-            isConnected = false;
-          }
-          line.style.opacity = '0.1';
-        });
         // Highlight edges connecting to selected node by position matching
         if (nmaResult.edges) {
           const nodeCircles = svg.querySelectorAll('circle[data-node-idx]');
@@ -11349,17 +11400,22 @@ body.dark-mode .input-error { background: #451a1a !important; }
       // Build a simple base GRADE from the league table entry
       const entry = lookup.get(key);
       if (!entry) { gradeCache.set(key, null); return null; }
-      // Base GRADE: start HIGH, downgrade for imprecision/inconsistency
-      // computeGRADE(pooledResult, studyData) — first arg is result object, second is array
-      const validStudies = extractedStudies.filter(s => s.effectEstimate !== null && s.lowerCI !== null && s.upperCI !== null);
+      // Base GRADE: use per-comparison study count for this edge
+      const [ct1, ct2] = key.split('||');
+      const compStudies = extractedStudies.filter(s => {
+        if (s.effectEstimate == null || s.lowerCI == null || s.upperCI == null) return false;
+        const st1 = (s.treatment1 || '').trim(), st2 = (s.treatment2 || '').trim();
+        return (st1 === ct1 && st2 === ct2) || (st1 === ct2 && st2 === ct1);
+      });
+      const kComp = compStudies.length || 1;
       const pooledObj = {
         pooled: isRatio ? Math.exp(entry.effect) : entry.effect,
         pooledLo: isRatio ? Math.exp(entry.lo) : entry.lo,
         pooledHi: isRatio ? Math.exp(entry.hi) : entry.hi,
         tau2: nmaResult.tau2 ?? 0, I2: nmaResult.I2global ?? 0,
-        k: nmaResult.nE ?? validStudies.length, isRatio: isRatio
+        k: kComp, isRatio: isRatio
       };
-      const baseGrade = computeGRADE(pooledObj, validStudies);
+      const baseGrade = computeGRADE(pooledObj, compStudies.length > 0 ? compStudies : extractedStudies);
       // Enhance with NMA-specific domains
       const nmaGrade = computeGRADE_NMA(baseGrade, nmaResult, nodeSplits, key);
       gradeCache.set(key, nmaGrade);
@@ -11453,6 +11509,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     const isDark = document.body.classList.contains('dark-mode');
 
     let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" role="img" aria-label="' + escapeHtml(label) + ' bar chart for ' + n + ' treatments" style="font-family:system-ui;max-width:100%">';
+    svg += '<title>' + escapeHtml(label) + ': Treatment ranking probabilities (0\u20131). Higher values indicate better relative performance.</title>';
     svg += '<rect width="' + W + '" height="' + H + '" fill="' + (theme.surface || '#fff') + '"/>';
     svg += '<text x="' + (W / 2) + '" y="18" text-anchor="middle" font-size="13" font-weight="600" fill="' + (theme.text || '#1e293b') + '">' + escapeHtml(label) + '</text>';
 
@@ -11475,7 +11532,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     for (let t = 0; t < nT; t++) {
       let meanRank = 0;
       for (let r = 0; r < nT; r++) meanRank += rankProbs[t][r] * (r + 1);
-      sucra.push((nT - meanRank) / (nT - 1));
+      sucra.push(nT > 1 ? (nT - meanRank) / (nT - 1) : 1);
     }
     const sorted = treatments.map((t, i) => ({ t, i, sucra: sucra[i] })).sort((a, b) => b.sucra - a.sucra);
 
@@ -11916,7 +11973,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
         const varij = V[i][i] + V[refIdx][refIdx] - 2 * V[i][refIdx];
         const seij = Math.sqrt(Math.max(1e-12, varij));
         const z = dij / seij;
-        const lowerBetter = nmaResult.lowerBetter ?? true;
+        const pDir = document.getElementById('pscoreDirectionSelect')?.value || 'auto';
+        const lowerBetter = pDir === 'higher' ? false : pDir === 'lower' ? true : (nmaResult.isRatio ?? true);
         pBen = lowerBetter ? normalCDF(-z) : normalCDF(z);
       }
       rows.push({
@@ -11955,8 +12013,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
     // Header
     svg += '<text x="10" y="20" font-size="12" font-weight="bold">Treatment vs ' + escapeHtml(refTreatment) + '</text>';
     svg += '<text x="' + (plotLeft + plotW / 2) + '" y="38" text-anchor="middle" font-size="10" font-weight="bold">' + (isRatio ? 'Effect (ratio scale)' : 'Effect Estimate') + ' (' + confPct + '% CI)</text>';
-    svg += '<text x="555" y="38" font-size="10" font-weight="bold">P-score</text>';
-    svg += '<text x="610" y="38" font-size="10" font-weight="bold">P(ben)</text>';
+    svg += '<text x="555" y="38" font-size="10" font-weight="bold"><title>P-score (R\u00FCcker &amp; Schwarzer 2015): probability of being the best treatment, averaged over all competitors.</title>P-score</text>';
+    svg += '<text x="610" y="38" font-size="10" font-weight="bold"><title>Probability of benefit: posterior probability that the treatment is better than the reference.</title>P(ben)</text>';
     svg += '<text x="660" y="38" font-size="10" font-weight="bold">Est [' + confPct + '% CI]</text>';
 
     // Null effect line
@@ -12034,15 +12092,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
       svg += '<text x="' + tx + '" y="' + (axisY + 15) + '" text-anchor="middle" font-size="10">' + v + '</text>';
     });
 
-    // Favours labels using actual treatment names
+    // Favours labels — convention: left of null = favours reference
     const favoursY = axisY + 28;
-    if (isRatio) {
-      svg += '<text x="' + (plotLeft + 10) + '" y="' + favoursY + '" font-size="10" fill="var(--text-muted)">Favours ' + escapeHtml(refTreatment) + '</text>';
-      svg += '<text x="' + (plotRight - 10) + '" y="' + favoursY + '" text-anchor="end" font-size="10" fill="var(--text-muted)">Favours Treatment</text>';
-    } else {
-      svg += '<text x="' + (plotLeft + 10) + '" y="' + favoursY + '" font-size="10" fill="var(--text-muted)">Favours ' + escapeHtml(refTreatment) + '</text>';
-      svg += '<text x="' + (plotRight - 10) + '" y="' + favoursY + '" text-anchor="end" font-size="10" fill="var(--text-muted)">Favours Treatment</text>';
-    }
+    svg += '<text x="' + (plotLeft + 10) + '" y="' + favoursY + '" font-size="10" fill="var(--text-muted)">Favours ' + escapeHtml(refTreatment) + '</text>';
+    svg += '<text x="' + (plotRight - 10) + '" y="' + favoursY + '" text-anchor="end" font-size="10" fill="var(--text-muted)">Favours Treatment</text>';
 
     // Legend
     svg += '<text x="' + plotLeft + '" y="' + (favoursY + 14) + '" font-size="10" fill="var(--text-muted)">';
@@ -12194,7 +12247,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
     const w = 500, h = 420, pad = 55;
     const maxInvSE = Math.max(...points.map(p => p.invSE)) * 1.1;
-    const maxResidual = Math.max(...points.map(p => Math.abs(p.residual))) * 1.3;
+    const maxResidual = Math.max(Math.max(...points.map(p => Math.abs(p.residual))) * 1.3, 0.1);
 
     const xScale = (v) => pad + (v + maxResidual) / (2 * maxResidual) * (w - 2 * pad);
     const yScale = (inv) => pad + (1 - inv / maxInvSE) * (h - 2 * pad);
@@ -12204,7 +12257,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     svg += '<text x="' + (w / 2) + '" y="32" text-anchor="middle" font-size="10" fill="var(--text-muted)">(Chaimani et al. 2013)</text>';
 
     // Funnel triangle centered at 0
-    const zCrit = nmaResult.zCrit ?? 1.96;
+    const zCrit = nmaResult.zCrit ?? normalQuantile(1 - (1 - (nmaResult.confLevel ?? 0.95)) / 2);
     const topX = xScale(0);
     const topY = yScale(maxInvSE);
     const bottomSE = 1 / (maxInvSE * 0.01 + 0.001); // bottom of funnel
@@ -12369,14 +12422,19 @@ body.dark-mode .input-error { background: #451a1a !important; }
       showToast('Analysis blocked by strict methodology gates. Resolve extraction issues first.', 'danger');
       return;
     }
+    // k < 2: informative warnings already rendered; NMA requires >= 2 studies
+    if (valid.length < 2) return;
 
     // === Interactive Sensitivity: filter out excluded studies ===
     window._lastExtractedStudies = extractedStudies;
     if (_interactiveSensExcluded.size > 0) {
       var beforeCount = valid.length;
       valid = valid.filter(function(s) {
-        var key = s.authorYear || s.study || '';
-        return !_interactiveSensExcluded.has(key);
+        var studyLabel = s.authorYear || s.study || '';
+        var t1 = (s.treatment1 || '').trim(), t2 = (s.treatment2 || '').trim();
+        var key = studyLabel + '||' + t1 + '||' + t2;
+        var keyRev = studyLabel + '||' + t2 + '||' + t1;
+        return !_interactiveSensExcluded.has(key) && !_interactiveSensExcluded.has(keyRev);
       });
       var excCount = beforeCount - valid.length;
       if (excCount > 0) warnMsgs.push(excCount + ' study(ies) excluded via interactive sensitivity panel');
@@ -12482,8 +12540,11 @@ body.dark-mode .input-error { background: #451a1a !important; }
       (showTau2Method ? '<div class="stat-card"><div class="stat-label">\u03C4\u00B2 method</div><div class="stat-value">' + escapeHtml(tau2MethodLabel) + '</div></div>' : '');
 
     if (nmaEngine === 'bayesian' && nmaResult.rhat) {
-      const maxRhat = Math.max(...nmaResult.rhat);
+      const maxRhat = Math.max(...nmaResult.rhat, nmaResult.rhatTau2 ?? 1);
       summaryHTML += '<div class="stat-card"><div class="stat-label">Max R-hat</div><div class="stat-value">' + maxRhat.toFixed(3) + (maxRhat < 1.1 ? ' \u2713' : ' \u26A0') + '</div></div>';
+      if (nmaResult.rhatTau2 != null) {
+        summaryHTML += '<div class="stat-card"><div class="stat-label">R-hat (\u03C4\u00B2)</div><div class="stat-value">' + nmaResult.rhatTau2.toFixed(3) + (nmaResult.rhatTau2 < 1.1 ? ' \u2713' : ' \u26A0') + '</div></div>';
+      }
     }
     // P5-1: DIC stat card for Bayesian NMA
     if (nmaEngine === 'bayesian' && nmaResult.DIC != null) {
@@ -12598,6 +12659,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         }
         // Node-splitting
         const nodeSplits = runNodeSplitting(network, confLevel, nmaResult);
+        nmaResult.nodeSplitResults = nodeSplits; // store for CINeMA domain 6
         if (nodeSplits.length > 0) {
           cHtml += '<h4 style="font-size:0.88rem;margin:12px 0 8px">Node-Splitting (Dias 2010)</h4>';
           cHtml += '<table style="font-size:0.82rem;border-collapse:collapse;width:100%"><caption class="sr-only">Node-splitting consistency test results (Dias 2010)</caption>';
@@ -12662,7 +12724,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     // Comparison-adjusted funnel plot (Chaimani 2013)
     const caFunnelEl = document.getElementById('compAdjFunnelContainer');
     if (caFunnelEl && nmaResult && nmaResult.edges) {
-      const cafSvg = renderCompAdjFunnel(nmaResult);
+      let cafSvg; try { cafSvg = renderCompAdjFunnel(nmaResult); } catch(_e) { cafSvg = null; }
       if (cafSvg) {
         // P5-4: Comparison-adjusted PET-PEESE
         let caPPHtml = '';
@@ -12683,49 +12745,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
       }
     }
 
+    // componentContainer cleared — contribution matrix rendered once in contributionMatrixContainer below
     const componentEl = document.getElementById('componentContainer');
-    if (componentEl) {
-      if (nmaEngine === 'frequentist' && nmaResult.hatMatrix) {
-        const contrib = computeContributionMatrix(nmaResult);
-        let cmHtml = '<h3 style="font-size:0.95rem;margin-bottom:8px">Evidence Contribution Matrix</h3>';
-        // P3-6: Color legend
-        cmHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.72rem;color:var(--text-muted)">';
-        cmHtml += '<span>Contribution:</span>';
-        const legendSteps = [0, 25, 50, 75, 100];
-        legendSteps.forEach(pct => {
-          const bg = 'rgba(37,99,235,' + (pct / 100 * 0.7).toFixed(2) + ')';
-          const clr = pct > 40 ? '#fff' : 'var(--text)';
-          cmHtml += '<span style="display:inline-block;width:28px;text-align:center;padding:2px;background:' + bg + ';color:' + clr + ';border-radius:3px">' + pct + '%</span>';
-        });
-        cmHtml += '</div>';
-        cmHtml += '<div style="overflow-x:auto"><table style="font-size:0.72rem;border-collapse:collapse">';
-        cmHtml += '<tr><th style="padding:4px;border:1px solid var(--border)">Network Est.</th>';
-        for (const e of nmaResult.edges) {
-          cmHtml += '<th style="padding:4px;border:1px solid var(--border);writing-mode:vertical-lr;font-size:0.65rem">' + escapeHtml(e.t1) + ' v ' + escapeHtml(e.t2) + '</th>';
-        }
-        cmHtml += '<th style="padding:4px;border:1px solid var(--border);font-weight:600">Total</th>';
-        cmHtml += '</tr>';
-        for (let i = 0; i < nmaResult.nE; i++) {
-          cmHtml += '<tr><td style="padding:4px;border:1px solid var(--border);white-space:nowrap">' + escapeHtml(nmaResult.edges[i].t1) + ' vs ' + escapeHtml(nmaResult.edges[i].t2) + '</td>';
-          let rowTotal = 0;
-          for (let j = 0; j < nmaResult.nE; j++) {
-            const pct = contrib[i][j];
-            rowTotal += pct;
-            const bg = 'rgba(37,99,235,' + (pct / 100 * 0.7).toFixed(2) + ')';
-            const clr = pct > 40 ? '#fff' : 'var(--text)';
-            const tooltip = escapeHtml(nmaResult.edges[j].t1) + ' vs ' + escapeHtml(nmaResult.edges[j].t2) + ' contributes ' + pct.toFixed(1) + '% to ' + escapeHtml(nmaResult.edges[i].t1) + ' vs ' + escapeHtml(nmaResult.edges[i].t2);
-            cmHtml += '<td style="padding:3px;border:1px solid var(--border);text-align:center;background:' + bg + ';color:' + clr + ';cursor:help" title="' + tooltip + '">' + (pct > 0.5 ? pct.toFixed(0) + '%' : '') + '</td>';
-          }
-          cmHtml += '<td style="padding:3px;border:1px solid var(--border);text-align:center;font-weight:600">' + rowTotal.toFixed(0) + '%</td>';
-          cmHtml += '</tr>';
-        }
-        cmHtml += '</table></div>';
-        cmHtml += '<p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">Each row shows how direct comparisons contribute to network estimates. Rows should sum to 100%. Hover cells for details.</p>';
-        componentEl.innerHTML = cmHtml;
-      } else {
-        componentEl.innerHTML = '';
-      }
-    }
+    if (componentEl) componentEl.innerHTML = '';
 
     // NMA-Level Leave-One-Out (render into nmaLooContainer)
     const nmaLooEl = document.getElementById('nmaLooContainer');
@@ -12746,7 +12768,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           '<th scope="col" style="padding:6px;text-align:right">nT</th>' +
           '<th scope="col" style="padding:6px;text-align:right">nE</th>' +
           '<th scope="col" style="padding:6px;text-align:left">Top Treatment</th>' +
-          '<th scope="col" style="padding:6px;text-align:right">P-score</th>' +
+          '<th scope="col" style="padding:6px;text-align:right" title="P-score: probability that a treatment is better than a competitor, averaged over all competitors (0\u20131).">P-score</th>' +
           '<th scope="col" style="padding:6px;text-align:center">Note</th>' +
           '</tr></thead><tbody>';
         const baseTau2 = nmaResult.tau2;
@@ -12792,8 +12814,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
     if (nmaEngine === 'frequentist' && network) {
       renderNMASensitivityBattery(network, confLevel);
     } else {
-      const nmaSensEl = document.getElementById('nmaSensitivityContainer');
-      if (nmaSensEl) nmaSensEl.innerHTML = '';
+      const nmaBatteryEl = document.getElementById('nmaBatteryContainer');
+      if (nmaBatteryEl) nmaBatteryEl.innerHTML = '';
     }
 
     // P5-5: NMA Meta-Regression
@@ -12895,7 +12917,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
           const storedData = JSON.parse(analysisSummaryEl.dataset.lastResult ?? '{}');
           storedData.pEgger = asymTest.pValue;
           analysisSummaryEl.dataset.lastResult = JSON.stringify(storedData);
-        } catch(e) {}
+        } catch(e) { msaLog('warn', 'analyze', 'Failed to store Egger result: ' + (e?.message || e)); }
         const testName = asymTest.test === 'Peters' ? 'Peters\' Test (binary outcomes)' : 'Egger\'s Regression Test';
         eggerEl.innerHTML = '<h3 style="font-size:0.95rem;margin-bottom:4px">' + escapeHtml(testName) + '</h3>' +
           '<p style="font-size:0.82rem">' + (asymTest.test === 'Peters' ? 'Slope' : 'Intercept') + ' = ' + (asymTest.test === 'Peters' ? asymTest.slope : asymTest.intercept).toFixed(3) + ' (SE = ' + asymTest.seIntercept.toFixed(3) + '), ' +
@@ -12959,7 +12981,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       var tau2ForPP = nmaResult ? (nmaResult.tau2 ?? (nmaResult.tau2Summary ? nmaResult.tau2Summary.median : 0)) : 0;
       var petPeeseResult = computePETPEESE(result.studyResults, tau2ForPP);
       var harbordResult = computeHarbordTest(result.studyResults, extractedStudies);
-      var petHtml = renderPETPEESE(petPeeseResult, harbordResult, result.studyResults);
+      var petHtml = renderPETPEESE(petPeeseResult, harbordResult, result.studyResults, confLevel);
       if (petNmaEl) petNmaEl.innerHTML = petHtml;
     } else if (petNmaEl) {
       petNmaEl.innerHTML = '';
@@ -13018,6 +13040,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var compNMAEl = document.getElementById('componentNMAContainer');
     if (compNMAEl && nmaResult) {
       var compResult = runComponentNMA(nmaResult);
+      window._lastComponentNMAResult = compResult; // for CSV export
       if (compResult) {
         compNMAEl.innerHTML = renderComponentNMA(compResult, nmaResult.isRatio, nmaResult.confLevel);
       } else {
@@ -13037,7 +13060,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var gradeResult = computeGRADE(gradeInput, extractedStudies);
     // Apply NMA-specific GRADE extensions if NMA result available
     var nodeSplitsForGrade = null;
-    try { nodeSplitsForGrade = runNodeSplitting(network, confLevel, nmaResult); } catch(e) {}
+    try { nodeSplitsForGrade = runNodeSplitting(network, confLevel, nmaResult); } catch(e) { msaLog('warn', 'analyze', 'Node-splitting for GRADE failed: ' + (e?.message || e)); }
     if (gradeResult && nmaResult) {
       gradeResult = computeGRADE_NMA(gradeResult, nmaResult, nodeSplitsForGrade, null);
     }
@@ -13095,7 +13118,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
         var storedData2 = JSON.parse(analysisSummaryEl.dataset.lastResult ?? '{}');
         if (result.pooled <= 1) { storedData2.NNT = nntVal; } else { storedData2.NNH = nntVal; }
         analysisSummaryEl.dataset.lastResult = JSON.stringify(storedData2);
-      } catch(e) {}
+      } catch(e) { msaLog('warn', 'analyze', 'Failed to store NNT result: ' + (e?.message || e)); }
       var buildNntDisplay = function(risk) {
         var n = computeNNT(result.pooled, true, risk, effectType);
         var nLo = computeNNT(result.pooledHi, true, risk, effectType);
@@ -13158,13 +13181,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
     renderFragilityIndex(fiResult);
 
     // --- Meta-Regression (moderator analysis) ---
-    renderMetaRegression(extractedStudies, result, result.tau2);
+    renderMetaRegression(extractedStudies, result, result.tau2, confLevel);
 
     // --- Advanced diagnostics (ported from Autopilot) ---
     if (result && result.studyResults) {
       var baujatData = computeBaujatData(result.studyResults);
       renderBaujatPlot(baujatData);
-      renderGalbraithPlot(result.studyResults, result.muRE ?? 0);
+      renderGalbraithPlot(result.studyResults, result.muRE ?? 0, confLevel);
       var influenceData = computeInfluenceDiagnostics(result.studyResults, result.tau2 ?? 0);
       renderInfluenceDiagnostics(influenceData);
       var diagEffectType = extractedStudies.length > 0 ? (extractedStudies[0].effectType || 'MD') : 'MD';
@@ -13187,7 +13210,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
 
     } catch (err) {
-      console.error('Meta-analysis failed:', err);
+      console.warn('Meta-analysis failed:', err);
       showToast('Meta-analysis failed: ' + (err.message || 'Unknown error'), 'danger');
     } finally {
       if (_runBtn) { _runBtn.disabled = false; _runBtn.textContent = 'Run Network Meta-Analysis'; }
@@ -13569,9 +13592,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
   }
 
   // ============================================================
-  // FRAGILITY INDEX (Walsh et al. 2014)
+  // INFLUENCE COUNT (study-level leave-one-out sensitivity)
   // ============================================================
-  // For binary outcomes: minimum events to add/remove to flip statistical significance
+  // Counts how many individual study removals flip statistical significance
   function computeFragilityIndex(studies) {
     if (!studies || studies.length < 2) return null;
     var valid = studies.filter(function(s) {
@@ -13624,7 +13647,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       : fiResult.fragilityIndex <= 2 ? 'Moderately fragile' : 'Fragile';
 
     var html = '<div style="border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg-card)">' +
-      '<h3 style="font-size:0.95rem;margin:0 0 10px 0">Fragility Index</h3>' +
+      '<h3 style="font-size:0.95rem;margin:0 0 10px 0">Influence Count (Study-Level Sensitivity)</h3>' +
       '<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">' +
       '<div style="text-align:center">' +
       '<div style="font-size:2.2rem;font-weight:700;color:' + fiColor + '">' + fiResult.fragilityIndex + '</div>' +
@@ -13633,7 +13656,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       '<div>' +
       '<p style="font-size:0.85rem;margin:0 0 4px 0"><strong>Status:</strong> ' +
       (fiResult.isSignificant ? 'Pooled result is statistically significant (p &lt; 0.05)' : 'Pooled result is not statistically significant') + '</p>' +
-      '<p style="font-size:0.85rem;margin:0 0 4px 0"><strong>Fragility:</strong> ' +
+      '<p style="font-size:0.85rem;margin:0 0 4px 0"><strong>Influence:</strong> ' +
       '<span style="color:' + fiColor + ';font-weight:600">' + robustLabel + '</span> &mdash; ' +
       (fiResult.fragilityIndex === 0
         ? 'No single study removal changes significance'
@@ -13643,9 +13666,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
       (fiResult.fragileStudy ? '<p style="font-size:0.85rem;margin:0"><strong>Most influential:</strong> ' + escapeHtml(fiResult.fragileStudy) + '</p>' : '') +
       '</div></div>' +
       '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:10px">' +
-      'Fragility Index: number of study removals needed to change statistical significance (study-level leave-one-out approach). ' +
-      'Fragility Quotient (FQ) = FI/k. FQ &gt; 0.33 suggests the meta-analysis conclusion is sensitive to individual studies. ' +
-      'Ref: Walsh et al. (2014) J Clin Epidemiol.</p>' +
+      'Influence Count: number of individual study removals that change statistical significance (leave-one-out approach). ' +
+      'Influence Quotient (IQ) = count/k. IQ &gt; 0.33 suggests the conclusion is sensitive to individual studies. ' +
+      'Note: this is a study-level sensitivity measure, not the Walsh (2014) event-addition Fragility Index.</p>' +
       '</div>';
     container.innerHTML = html;
   }
@@ -16978,10 +17001,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // P2-6 Security: CSV formula injection protection
   // Prepend ' to cells starting with =+@\t\r (NOT - per lessons.md, to avoid corrupting negative values)
   function csvSafeCell(val) {
-    const s = String(val ?? '');
-    if (/^[=+@\t\r]/.test(s)) return "'" + s;
+    var s = String(val ?? '').replace(/[\r\n]+/g, ' ');  // Sanitize newlines first
+    if (/^[=+@\t]/.test(s)) s = "'" + s;
     // Escape fields containing commas or quotes
-    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    if (s.includes(',') || s.includes('"')) {
       return '"' + s.replace(/"/g, '""') + '"';
     }
     return s;
@@ -20041,7 +20064,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const resultsMarkdown = String(parsed.resultsMarkdown || '').trim();
       if (!methodsMarkdown && !resultsMarkdown) return null;
       return parsed;
-    } catch (_) {
+    } catch (pe) {
+      msaLog('debug', 'truthcert', 'Writeback parse failed:', pe.message);
       return null;
     }
   }
@@ -20811,7 +20835,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
       try {
         localStorage.setItem(TRUTHCERT_BRIDGE_STORAGE_KEY, JSON.stringify(envelope));
-      } catch (_) {}
+      } catch (lse) { msaLog('warn', 'truthcert', 'Bridge storage write failed:', lse.message); }
 
       const truthCertUrl = safeGetStorage('metaSprintNMA_truthcert-url', DEFAULT_TRUTHCERT_URL) || DEFAULT_TRUTHCERT_URL;
       // S6-1: Validate URL scheme to prevent javascript: injection via localStorage
@@ -20831,7 +20855,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
       let attempts = 0;
       const pushMessage = () => {
         attempts += 1;
-        try { const targetOrigin = new URL(truthCertUrl, window.location.href).origin; child.postMessage(envelope, targetOrigin); } catch (_) {}
+        try { const targetOrigin = new URL(truthCertUrl, window.location.href).origin; child.postMessage(envelope, targetOrigin); } catch (pme) { msaLog('debug', 'truthcert', 'postMessage failed:', pme.message); }
         if (attempts < 20) setTimeout(pushMessage, 400);
       };
       setTimeout(pushMessage, 350);
@@ -20939,7 +20963,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
   // RCT EXTRACTOR INTEGRATION (optional, localhost:8000)
   // ============================================================
   let EXTRACTOR_URL = (safeGetStorage('metaSprintNMA_extractor-url', 'http://localhost:8000') || 'http://localhost:8000').replace(/\/+$/, '');
-  try { const _eu = new URL(EXTRACTOR_URL); if (!['http:', 'https:'].includes(_eu.protocol)) EXTRACTOR_URL = 'http://localhost:8000'; } catch (_) { EXTRACTOR_URL = 'http://localhost:8000'; }
+  try { const _eu = new URL(EXTRACTOR_URL); if (!['http:', 'https:'].includes(_eu.protocol)) EXTRACTOR_URL = 'http://localhost:8000'; } catch (ue) { msaLog('debug', 'extractor', 'Invalid URL, using default:', ue.message); EXTRACTOR_URL = 'http://localhost:8000'; }
   const EXTRACTOR_MIN_CONFIDENCE = 0.70;
   const CARDIO_REGISTRY_ONLY_MODE = true;
   const DISABLE_PDF_UPLOAD_MODE = true;
@@ -21089,8 +21113,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       const parts = h.components || {};
       const pdfStatus = String(parts.pdf_parser || '').trim();
       statusEl.textContent = 'Extractor online' + (ver ? (' v' + ver) : '') + (pdfStatus ? (' | PDF parser: ' + pdfStatus) : '');
-    } catch (_) {
-      // Keep silent when offline; runExtractor will provide actionable startup command.
+    } catch (he) {
+      msaLog('debug', 'extractor', 'Health check offline:', he.message);
     }
   }
 
@@ -23872,7 +23896,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
     if (!nmaResult || !nmaResult.d || !nmaResult.V) return null;
     const nT = nmaResult.nT;
     const pBenefits = [];
-    const lowerBetter = nmaResult.lowerBetter ?? true;
+    const pDir = document.getElementById('pscoreDirectionSelect')?.value || 'auto';
+    const lowerBetter = pDir === 'higher' ? false : pDir === 'lower' ? true : (nmaResult.isRatio ?? true);
     for (let t = 0; t < nT; t++) {
       const se = Math.sqrt(nmaResult.V[t][t]);
       if (se <= 0 || !isFinite(se)) { pBenefits.push(null); continue; }
@@ -24349,7 +24374,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
   function renderContributionMatrix(nmaResult) {
     if (!nmaResult || !nmaResult.hatMatrix || !nmaResult.edges) return '';
-    const H = nmaResult.hatMatrix;
+    const contrib = computeContributionMatrix(nmaResult);
     const edges = nmaResult.edges;
     const nE = nmaResult.nE;
     if (nE < 2) return '';
@@ -24365,21 +24390,28 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var html = '<h3 style="font-size:0.95rem;margin-bottom:4px">Contribution Matrix</h3>';
     html += '<p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:8px">Proportion of each network estimate (row) derived from each direct comparison (column). Papakonstantinou et al. 2018.</p>';
     html += '<div style="overflow-x:auto;max-width:100%"><table style="border-collapse:collapse;font-size:0.75rem;white-space:nowrap">';
-    html += '<thead><tr><th style="padding:3px 6px;border:1px solid var(--border);background:var(--surface-alt)">Network Est \\ Direct</th>';
+    html += '<thead><tr><th scope="col" style="padding:3px 6px;border:1px solid var(--border);background:var(--surface-alt)">Network Est \\ Direct</th>';
     for (var c = 0; c < nE; c++) {
-      html += '<th style="padding:3px 6px;border:1px solid var(--border);background:var(--surface-alt);writing-mode:vertical-rl;transform:rotate(180deg);max-height:100px">' + escapeHtml(eLabels[c]) + '</th>';
+      html += '<th scope="col" style="padding:3px 6px;border:1px solid var(--border);background:var(--surface-alt);writing-mode:vertical-rl;transform:rotate(180deg);max-height:100px">' + escapeHtml(eLabels[c]) + '</th>';
     }
     html += '</tr></thead><tbody>';
     for (var r = 0; r < nE; r++) {
-      html += '<tr><td style="padding:3px 6px;border:1px solid var(--border);font-weight:600;background:var(--surface-alt)">' + escapeHtml(eLabels[r]) + '</td>';
+      html += '<tr><th scope="row" style="padding:3px 6px;border:1px solid var(--border);font-weight:600;background:var(--surface-alt)">' + escapeHtml(eLabels[r]) + '</th>';
       for (var ci = 0; ci < nE; ci++) {
-        var val = H[r] ? (H[r][ci] || 0) : 0;
-        var pct = Math.round(val * 100);
-        // Color: intensity proportional to contribution
-        var alpha = Math.min(1, Math.max(0, val));
-        var bg = 'rgba(59,130,246,' + (alpha * 0.7).toFixed(2) + ')';
-        var fg = alpha > 0.4 ? '#fff' : 'var(--text)';
-        html += '<td style="padding:3px 6px;border:1px solid var(--border);text-align:center;background:' + bg + ';color:' + fg + '">' + (pct > 0 ? pct + '%' : '') + '</td>';
+        var pctVal = contrib[r] ? (contrib[r][ci] != null ? contrib[r][ci] : 0) : 0;
+        var pct = pctVal.toFixed(1);
+        // Diverging color: blue for positive, orange for negative contributions
+        var absFrac = Math.min(1, Math.abs(pctVal) / 100);
+        var bg, fg;
+        if (pctVal < -0.1) {
+          bg = 'rgba(234,88,12,' + (absFrac * 0.7).toFixed(2) + ')';
+          fg = absFrac > 0.4 ? '#fff' : 'var(--text)';
+        } else {
+          bg = 'rgba(59,130,246,' + (absFrac * 0.7).toFixed(2) + ')';
+          fg = absFrac > 0.4 ? '#fff' : 'var(--text)';
+        }
+        var displayPct = Math.abs(pctVal) > 0.5 ? Math.round(pctVal) + '%' : '';
+        html += '<td title="' + escapeHtml(eLabels[r]) + ' \u2190 ' + escapeHtml(eLabels[ci]) + ': ' + pct + '%" style="padding:3px 6px;border:1px solid var(--border);text-align:center;background:' + bg + ';color:' + fg + '">' + displayPct + '</td>';
       }
       html += '</tr>';
     }
@@ -24420,13 +24452,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
       // Flow ribbons from this direct comparison to each network estimate it contributes to
       for (var ni = 0; ni < nE; ni++) {
-        var contrib = H[ni] ? (H[ni][di] || 0) : 0;
-        if (contrib < 0.02) continue; // skip tiny contributions
-        var ribbonH = Math.max(1, contrib * barH);
+        var cFrac = contrib[ni] ? (contrib[ni][di] || 0) : 0;
+        var cNorm = cFrac / 100; // normalize to 0-1 for sizing
+        if (cNorm < 0.02) continue; // skip tiny contributions
+        var ribbonH = Math.max(1, cNorm * barH);
         var ny = topY + ni * spacing + barH / 2;
         var dy = ly + barH / 2;
         var midX = (leftX + 30 + rightX) / 2;
-        html += '<path d="M' + (leftX + 30) + ',' + dy + ' C' + midX + ',' + dy + ' ' + midX + ',' + ny + ' ' + rightX + ',' + ny + '" fill="none" stroke="' + col + '" stroke-width="' + ribbonH.toFixed(1) + '" opacity="' + Math.min(0.6, contrib + 0.1).toFixed(2) + '"/>';
+        html += '<path d="M' + (leftX + 30) + ',' + dy + ' C' + midX + ',' + dy + ' ' + midX + ',' + ny + ' ' + rightX + ',' + ny + '" fill="none" stroke="' + col + '" stroke-width="' + ribbonH.toFixed(1) + '" opacity="' + Math.min(0.6, cNorm + 0.1).toFixed(2) + '"/>';
       }
     }
     html += '</svg>';
@@ -24494,9 +24527,13 @@ body.dark-mode .input-error { background: #451a1a !important; }
 
     // User-configurable clinical decision threshold
     var thresholdInput = parseFloat(document.getElementById('cinemaThreshold')?.value);
-    var threshold = isFinite(thresholdInput) && thresholdInput > 0
-      ? thresholdInput
-      : (nmaResult.isRatio ? Math.log(1.25) : 0.5);
+    var threshold;
+    if (isFinite(thresholdInput) && thresholdInput > 0) {
+      // For ratio measures, user enters native-scale threshold (e.g. 1.25); convert to log scale
+      threshold = nmaResult.isRatio && thresholdInput > 1 ? Math.log(thresholdInput) : thresholdInput;
+    } else {
+      threshold = nmaResult.isRatio ? Math.log(1.25) : 0.5;
+    }
 
     // User-configurable RoB summarization rule
     var robRule = document.getElementById('robSumRule')?.value || 'average';
@@ -24589,8 +24626,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
       comp.domains.heterogeneity = tau2 < 0.001 ? 'no' :
         piCrossesThreshold ? 'major' : piCrossesNull ? 'some' : 'no';
 
-      // Domain 6: Incoherence — node-splitting p-value
-      var pInc = nmaResult.pInconsistency;
+      // Domain 6: Incoherence — per-comparison node-splitting p-value (Nikolakopoulou 2020)
+      // Falls back to global pInconsistency if no per-comparison result exists
+      var nodeSplits = nmaResult.nodeSplitResults || [];
+      var matchedSplit = null;
+      for (var ns = 0; ns < nodeSplits.length; ns++) {
+        var nsR = nodeSplits[ns];
+        if ((nsR.t1 === e.t1 && nsR.t2 === e.t2) || (nsR.t1 === e.t2 && nsR.t2 === e.t1)) {
+          matchedSplit = nsR;
+          break;
+        }
+      }
+      var pInc = matchedSplit ? matchedSplit.pValue : nmaResult.pInconsistency;
       comp.domains.incoherence = pInc == null ? 'no' :
         pInc < 0.05 ? 'major' : pInc < 0.10 ? 'some' : 'no';
 
@@ -24619,8 +24666,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
     html += '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:0.78rem;white-space:nowrap">';
     html += '<thead><tr>';
     var headers = ['Comparison', 'Within-study bias', 'Across-study bias', 'Indirectness', 'Imprecision', 'Heterogeneity', 'Incoherence', 'Overall'];
+    var headerTips = [
+      '', 'RoB of contributing studies, weighted by contribution matrix',
+      'Funnel plot asymmetry and small-study effects (Egger/S-value)',
+      'Proportion of indirect evidence from the contribution matrix',
+      'CI width relative to the clinical decision threshold',
+      'Prediction interval includes null or crosses clinical threshold',
+      'Node-splitting test: direct vs indirect evidence disagreement',
+      'Combined judgement across all 6 domains'
+    ];
     for (var h = 0; h < headers.length; h++) {
-      html += '<th style="padding:4px 8px;border:1px solid var(--border);background:var(--surface-alt)">' + headers[h] + '</th>';
+      var tip = headerTips[h] ? ' title="' + escapeHtml(headerTips[h]) + '"' : '';
+      html += '<th scope="col"' + tip + ' style="padding:4px 8px;border:1px solid var(--border);background:var(--surface-alt)">' + headers[h] + '</th>';
     }
     html += '</tr></thead><tbody>';
     var colorMap = { 'no': '#10b981', 'some': '#f59e0b', 'major': '#ef4444' };
@@ -24638,14 +24695,38 @@ body.dark-mode .input-error { background: #451a1a !important; }
       for (var d = 0; d < domainKeys.length; d++) {
         var val = c.domains[domainKeys[d]];
         var col = colorMap[val] || '#999';
-        html += '<td style="padding:4px 8px;border:1px solid var(--border);text-align:center;background:' + hexToRgba(col, 0.13) + ';color:' + col + ';font-weight:600">' + (labelMap[val] || val) + '</td>';
+        html += '<td style="padding:4px 8px;border:1px solid var(--border);text-align:center;background:' + hexToRgba(col, 0.25) + ';color:' + col + ';font-weight:600">' + (labelMap[val] || val) + '</td>';
       }
       var oc = overallColorMap[c.overall] || '#999';
-      html += '<td style="padding:4px 8px;border:1px solid var(--border);text-align:center;background:' + hexToRgba(oc, 0.2) + ';color:' + oc + ';font-weight:bold">' + escapeHtml(c.overall) + '</td>';
+      html += '<td style="padding:4px 8px;border:1px solid var(--border);text-align:center;background:' + hexToRgba(oc, 0.3) + ';color:' + oc + ';font-weight:bold">' + escapeHtml(c.overall) + '</td>';
       html += '</tr>';
     }
     html += '</tbody></table></div>';
+    html += '<button class="btn-outline" style="margin-top:8px;font-size:0.8rem" onclick="exportCinemaCSV()">Export CINeMA CSV</button>';
     return html;
+  }
+
+  function exportCinemaCSV() {
+    var cinemaResult = window._lastCinemaResult;
+    if (!cinemaResult || cinemaResult.length === 0) { showToast('No CINeMA data', 'warning'); return; }
+    var header = ['Comparison', 'Within-study bias', 'Across-study bias', 'Indirectness', 'Imprecision', 'Heterogeneity', 'Incoherence', 'Overall'];
+    var rows = [header.join(',')];
+    var labelMap = { 'no': 'No concerns', 'some': 'Some concerns', 'major': 'Major concerns' };
+    for (var i = 0; i < cinemaResult.length; i++) {
+      var c = cinemaResult[i];
+      rows.push([
+        csvSafeCell(c.label),
+        labelMap[c.domains.withinStudyBias] || c.domains.withinStudyBias,
+        labelMap[c.domains.acrossStudyBias] || c.domains.acrossStudyBias,
+        labelMap[c.domains.indirectness] || c.domains.indirectness,
+        labelMap[c.domains.imprecision] || c.domains.imprecision,
+        labelMap[c.domains.heterogeneity] || c.domains.heterogeneity,
+        labelMap[c.domains.incoherence] || c.domains.incoherence,
+        c.overall
+      ].join(','));
+    }
+    downloadFile(rows.join('\n'), 'cinema-assessment.csv', 'text/csv');
+    showToast('CINeMA assessment exported', 'success');
   }
 
   // ============================================================
@@ -25023,14 +25104,15 @@ body.dark-mode .input-error { background: #451a1a !important; }
       var edgeStudies = nmaResult.edges[ei].studies || [];
       for (var si = 0; si < edgeStudies.length; si++) {
         var s = edgeStudies[si];
-        var key = s.authorYear || s.study || ('Study_' + si);
+        var studyLabel = s.authorYear || s.study || ('Study_' + si);
+        var key = studyLabel + '||' + nmaResult.edges[ei].t1 + '||' + nmaResult.edges[ei].t2;
         if (seen.has(key)) continue;
         seen.add(key);
         var excluded = _interactiveSensExcluded.has(key);
         var robOverall = '';
-        var matchedFull = studies.find(function(st) { return (st.authorYear || st.study) === key; });
+        var matchedFull = studies.find(function(st) { return (st.authorYear || st.study) === studyLabel; });
         if (matchedFull && matchedFull.robOverall) robOverall = matchedFull.robOverall;
-        allStudies.push({ key: key, excluded: excluded, rob: robOverall, t1: nmaResult.edges[ei].t1, t2: nmaResult.edges[ei].t2 });
+        allStudies.push({ key: key, label: studyLabel, excluded: excluded, rob: robOverall, t1: nmaResult.edges[ei].t1, t2: nmaResult.edges[ei].t2 });
       }
     }
     for (var i = 0; i < allStudies.length; i++) {
@@ -25042,9 +25124,10 @@ body.dark-mode .input-error { background: #451a1a !important; }
         var robCol = s.rob.toLowerCase().includes('high') ? '#ef4444' : s.rob.toLowerCase().includes('some') ? '#f59e0b' : '#10b981';
         robBadge = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + robCol + ';margin-right:4px" title="RoB: ' + escapeHtml(s.rob) + '"></span>';
       }
+      var displayLabel = s.label || s.key;
       html += '<button style="padding:3px 8px;font-size:0.75rem;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;background:' + bgColor + ';color:' + textColor + '" ' +
         'onclick="_toggleInteractiveSensStudy(\'' + escapeHtml(s.key.replace(/'/g, "\\'")) + '\')" ' +
-        'title="' + escapeHtml(s.t1 + ' vs ' + s.t2) + '">' + robBadge + escapeHtml(s.key.length > 20 ? s.key.slice(0, 18) + '..' : s.key) +
+        'title="' + escapeHtml(displayLabel + ' (' + s.t1 + ' vs ' + s.t2 + ')') + '">' + robBadge + escapeHtml(displayLabel.length > 20 ? displayLabel.slice(0, 18) + '..' : displayLabel) +
         (s.excluded ? ' \u2717' : '') + '</button>';
     }
     html += '</div>';
@@ -25065,7 +25148,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
     for (var i = 0; i < studies.length; i++) {
       var rob = (studies[i].robOverall || '').toLowerCase();
       if (rob.includes('high')) {
-        _interactiveSensExcluded.add(studies[i].authorYear || studies[i].study || '');
+        var label = studies[i].authorYear || studies[i].study || '';
+        var t1 = (studies[i].treatment1 || '').trim(), t2 = (studies[i].treatment2 || '').trim();
+        _interactiveSensExcluded.add(label + '||' + t1 + '||' + t2);
       }
     }
     runAnalysis();
@@ -25269,7 +25354,7 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var seIntercept = Math.sqrt(mse / sw);
     var df = n - 2;
     var tStat = seIntercept > 0 ? intercept / seIntercept : 0;
-    var pValue = df > 0 ? 2 * (1 - tCDF(Math.abs(tStat), df)) : 1;
+    var pValue = df > 0 ? 2 * (1 - tCDFfn(Math.abs(tStat), df)) : 1;
     return { intercept: intercept, slope: slope, seIntercept: seIntercept, tStat: tStat, pValue: pValue, df: df };
   }
 
@@ -25326,15 +25411,18 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
     if (validStudies.length < 10) return null;
 
+    // Harbord (2006): regress Z/√V on 1/√V with weights 1/V (precision)
     var xArr = validStudies.map(function(s) { return 1 / s.sqrtV; });
     var yArr = validStudies.map(function(s) { return s.Z / s.sqrtV; });
-    var wArr = validStudies.map(function(s) { return s.V; });
+    var wArr = validStudies.map(function(s) { return 1 / s.V; });
     var reg = wlsRegressUtil(yArr, xArr, wArr);
     if (!reg) return null;
     return { test: 'Harbord', intercept: reg.intercept, slope: reg.slope, seIntercept: reg.seIntercept, tStat: reg.tStat, df: reg.df, pValue: reg.pValue, k: validStudies.length };
   }
 
-  function renderPETPEESE(petPeeseResult, harbordResult, studyResults) {
+  function renderPETPEESE(petPeeseResult, harbordResult, studyResults, confLevel) {
+    confLevel = confLevel ?? 0.95;
+    var zCrit = normalQuantile(1 - (1 - confLevel) / 2);
     var html = '';
     if (petPeeseResult) {
       var pp = petPeeseResult;
@@ -25342,19 +25430,26 @@ body.dark-mode .input-error { background: #451a1a !important; }
       html += '<p style="font-size:0.82rem">';
       html += '<strong>PET</strong> (yi ~ SE): intercept = ' + pp.pet.intercept.toFixed(3) + ' (SE = ' + pp.pet.seIntercept.toFixed(3) + '), ';
       html += 't(' + pp.pet.df + ') = ' + pp.pet.tStat.toFixed(2) + ', p = ' + (pp.pet.pValue < 0.001 ? '< 0.001' : pp.pet.pValue.toFixed(3)) + '. ';
+      var corrCI = pp.correctedSE > 0 ? ' [' + (pp.correctedEstimate - zCrit * pp.correctedSE).toFixed(3) + ', ' + (pp.correctedEstimate + zCrit * pp.correctedSE).toFixed(3) + ']' : '';
       if (pp.usePEESE && pp.peese) {
         html += '<br><strong>PEESE</strong> (yi ~ SE\u00B2): intercept = ' + pp.peese.intercept.toFixed(3) + ' (SE = ' + pp.peese.seIntercept.toFixed(3) + '). ';
-        html += '<br>PET significant (p < 0.10) \u2192 using PEESE-corrected estimate: <strong>' + pp.correctedEstimate.toFixed(3) + '</strong>';
+        html += '<br>PET significant (p < 0.10) \u2192 PEESE-corrected estimate: <strong>' + pp.correctedEstimate.toFixed(3) + corrCI + '</strong>';
       } else {
-        html += '<br>PET not significant \u2192 corrected estimate: <strong>' + pp.correctedEstimate.toFixed(3) + '</strong> (no strong small-study effect detected)';
+        html += '<br>PET not significant \u2192 corrected estimate: <strong>' + pp.correctedEstimate.toFixed(3) + corrCI + '</strong> (no strong small-study effect detected)';
       }
       html += '</p>';
 
       // Funnel plot with regression overlay
       if (studyResults && studyResults.length >= 3) {
         var fW = 420, fH = 280, fPad = 50, fRight = 380, fBot = 240;
-        var yiArr = studyResults.map(function(s) { return s.yi; });
-        var seArr = studyResults.map(function(s) { return s.sei; });
+        var yiArr = [], seArr = [];
+        for (var si = 0; si < studyResults.length; si++) {
+          var _yi = studyResults[si].yi, _sei = studyResults[si].sei;
+          if (_yi != null && isFinite(_yi) && _sei != null && isFinite(_sei) && _sei > 0) {
+            yiArr.push(_yi); seArr.push(_sei);
+          }
+        }
+        if (yiArr.length < 3) { /* skip funnel if too few valid points */ }
         var seMax = Math.max.apply(null, seArr) * 1.1;
         var yiMin = Math.min.apply(null, yiArr) - 0.2;
         var yiMax = Math.max.apply(null, yiArr) + 0.2;
@@ -25367,6 +25462,22 @@ body.dark-mode .input-error { background: #451a1a !important; }
         html += '<line x1="' + fPad + '" y1="' + fPad + '" x2="' + fPad + '" y2="' + fBot + '" stroke="var(--border)"/>';
         html += '<text x="' + ((fPad + fRight) / 2) + '" y="' + (fH - 5) + '" text-anchor="middle" font-size="10" fill="var(--text)">Effect Size</text>';
         html += '<text x="12" y="' + ((fPad + fBot) / 2) + '" text-anchor="middle" font-size="10" fill="var(--text)" transform="rotate(-90,12,' + ((fPad + fBot) / 2) + ')">SE</text>';
+        // X-axis ticks
+        var xTicks = 5;
+        for (var xt = 0; xt <= xTicks; xt++) {
+          var xv = yiMin + xt * (yiMax - yiMin) / xTicks;
+          var xtx = xScale(xv);
+          html += '<line x1="' + xtx.toFixed(1) + '" y1="' + fBot + '" x2="' + xtx.toFixed(1) + '" y2="' + (fBot + 4) + '" stroke="var(--text-muted)"/>';
+          html += '<text x="' + xtx.toFixed(1) + '" y="' + (fBot + 14) + '" text-anchor="middle" font-size="8" fill="var(--text-muted)">' + xv.toFixed(2) + '</text>';
+        }
+        // Y-axis ticks (SE)
+        var yTicks = 4;
+        for (var yt = 0; yt <= yTicks; yt++) {
+          var sv = yt * seMax / yTicks;
+          var yty = yScale(sv);
+          html += '<line x1="' + (fPad - 4) + '" y1="' + yty.toFixed(1) + '" x2="' + fPad + '" y2="' + yty.toFixed(1) + '" stroke="var(--text-muted)"/>';
+          html += '<text x="' + (fPad - 6) + '" y="' + (yty + 3).toFixed(1) + '" text-anchor="end" font-size="8" fill="var(--text-muted)">' + sv.toFixed(2) + '</text>';
+        }
 
         // Points
         for (var pi = 0; pi < yiArr.length; pi++) {
@@ -25420,11 +25531,14 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var nE = nmaResult.nE;
     var nT = nmaResult.nT;
 
-    // Detect components from treatment names
+    // Detect components from treatment names (configurable separator)
+    var sepInput = document.getElementById('componentSeparator');
+    var sepStr = (sepInput && sepInput.value.trim()) || '+';
+    var sepRegex = new RegExp('\\s*' + sepStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*');
     var allComponents = new Set();
     var treatComps = {};
     for (var t = 0; t < nT; t++) {
-      var parts = treatments[t].split(/\s*\+\s*/).map(function(p) { return p.trim(); }).filter(Boolean);
+      var parts = treatments[t].split(sepRegex).map(function(p) { return p.trim(); }).filter(Boolean);
       treatComps[treatments[t]] = parts;
       for (var p = 0; p < parts.length; p++) allComponents.add(parts[p]);
     }
@@ -25478,21 +25592,23 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
 
     var confLevel = nmaResult.confLevel || 0.95;
-    var zCrit = normalQuantile(1 - (1 - confLevel) / 2);
+    var df = Math.max(1, nE - nC);
+    var tCrit = df >= 120 ? normalQuantile(1 - (1 - confLevel) / 2) : tQuantile(1 - (1 - confLevel) / 2, df);
     var results = [];
     for (var i = 0; i < nC; i++) {
       var se = Math.sqrt(Math.max(0, CTCinv[i][i]));
+      var tStat = se > 0 ? beta[i] / se : 0;
       results.push({
         component: components[i],
         effect: beta[i],
         se: se,
-        lo: beta[i] - zCrit * se,
-        hi: beta[i] + zCrit * se,
-        z: se > 0 ? beta[i] / se : 0,
-        p: se > 0 ? 2 * (1 - normalCDF(Math.abs(beta[i] / se))) : 1
+        lo: beta[i] - tCrit * se,
+        hi: beta[i] + tCrit * se,
+        z: tStat,
+        p: se > 0 ? 2 * (1 - tCDFfn(Math.abs(tStat), df)) : 1
       });
     }
-    return { components: results, nComponents: nC, nEdges: nE };
+    return { components: results, nComponents: nC, nEdges: nE, df: df };
   }
 
   function renderComponentNMA(compResult, isRatio, confLevel) {
@@ -25518,9 +25634,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
     var xMax = Math.max.apply(null, allVals) + 0.1;
     var xScale = function(v) { return plotLeft + (v - xMin) / (xMax - xMin) * plotW; };
 
-    var svg = '<svg viewBox="0 0 600 ' + h + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Component NMA forest plot" style="max-width:600px;width:100%;font-family:var(--font)">';
+    var svg = '<svg viewBox="0 0 650 ' + h + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Component NMA forest plot" style="max-width:650px;width:100%;font-family:var(--font)">';
     svg += '<text x="10" y="16" font-size="12" font-weight="bold" fill="var(--text)">Component Effects</text>';
-    svg += '<text x="' + (plotLeft + plotW / 2) + '" y="30" text-anchor="middle" font-size="10" fill="var(--text)">' + (isRatio ? 'Log Scale' : 'Effect') + ' (' + confPct + '% CI)</text>';
+    svg += '<text x="' + (plotLeft + plotW / 2) + '" y="30" text-anchor="middle" font-size="10" fill="var(--text)">' + (isRatio ? 'Log Scale' : 'Effect') + ' (' + confPct + '% CI, t-dist df=' + (compResult.df || '?') + ')</text>';
     svg += '<text x="470" y="30" font-size="10" font-weight="bold" fill="var(--text)">Est [CI]</text>';
 
     // Null line
@@ -25542,7 +25658,32 @@ body.dark-mode .input-error { background: #451a1a !important; }
     }
     svg += '</svg>';
     html += svg;
+    html += '<div style="margin-top:6px;text-align:right"><button onclick="exportComponentNMACSV()" class="btn btn-sm" style="font-size:0.75rem;padding:2px 8px">Export CSV</button></div>';
     return html;
+  }
+
+  function exportComponentNMACSV() {
+    var compResult = window._lastComponentNMAResult;
+    if (!compResult || !compResult.components || compResult.components.length === 0) {
+      showToast('No Component NMA data to export', 'warning');
+      return;
+    }
+    var header = ['Component', 'Effect', 'SE', 'CI Lower', 'CI Upper', 'z', 'p-value'];
+    var rows = [header.join(',')];
+    for (var i = 0; i < compResult.components.length; i++) {
+      var c = compResult.components[i];
+      rows.push([
+        csvSafeCell(c.component),
+        c.effect.toFixed(4),
+        c.se.toFixed(4),
+        c.lo.toFixed(4),
+        c.hi.toFixed(4),
+        c.z.toFixed(4),
+        c.p < 0.001 ? '<0.001' : c.p.toFixed(4)
+      ].join(','));
+    }
+    downloadFile(rows.join('\n'), 'component-nma.csv', 'text/csv');
+    showToast('Component NMA exported', 'success');
   }
 
   </script>

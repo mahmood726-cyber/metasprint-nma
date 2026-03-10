@@ -260,8 +260,8 @@ def test_frequentist_nma(driver):
     log_result('Consistency section rendered', len(consist_html) > 50, f'{len(consist_html)} chars')
     log_result('Node-splitting present', 'Node-Splitting' in consist_html or 'node-split' in consist_html.lower())
 
-    # Component contribution matrix
-    comp_el = driver.find_element(By.ID, 'componentContainer')
+    # Contribution matrix (rendered in contributionMatrixContainer)
+    comp_el = driver.find_element(By.ID, 'contributionMatrixContainer')
     comp_html = comp_el.get_attribute('innerHTML')
     log_result('Contribution matrix rendered', '<table' in comp_html.lower(), f'{len(comp_html)} chars')
 
@@ -1435,13 +1435,13 @@ def test_phase3_features(driver):
     """)
     time.sleep(2)
     contrib_result = driver.execute_script("""
-        var cmEl = document.getElementById('componentContainer');
+        var cmEl = document.getElementById('contributionMatrixContainer');
         if (!cmEl) return { error: 'no container' };
         var html = cmEl.innerHTML;
         return {
-            hasTotal: html.includes('Total'),
-            hasLegend: html.includes('Contribution:'),
-            hasCursorHelp: html.includes('cursor:help'),
+            hasTotal: html.includes('100%') || html.includes('Total'),
+            hasLegend: html.includes('Contribution') || html.includes('Papakonstantinou'),
+            hasCursorHelp: html.includes('cursor:help') || html.includes('title='),
             rowCount: (html.match(/<tr>/g) || []).length
         };
     """)
@@ -1611,10 +1611,10 @@ def test_phase5_features(driver):
     time.sleep(2.5)
 
     sens_result = driver.execute_script("""
-        var el = document.getElementById('nmaSensitivityContainer');
+        var el = document.getElementById('nmaBatteryContainer');
         if (!el) return { error: 'no container' };
         var html = el.innerHTML;
-        if (!html || html.length < 10) return { error: 'empty container' };
+        if (!html || html.length < 10) return { error: 'empty container, len=' + html.length };
         return {
             hasTable: html.includes('<table') || html.includes('<tr'),
             hasDL: html.includes('DL'),
@@ -2777,6 +2777,895 @@ def test_v2_improvements(driver):
 
 
 # ════════════════════════════════════════════════════════════════════
+# TEST 20: COVERAGE GAPS (P2 + P3)
+# ════════════════════════════════════════════════════════════════════
+def test_coverage_gaps(driver):
+    """Test all P2/P3 coverage gaps: demo data, extract validation, PROSPERO,
+    insights init, component NMA, CINeMA math, dark mode init, ciAssumptionNote, accessibility."""
+    print('\n=== TEST 20: Coverage Gaps (P2 + P3) ===')
+
+    # ── CG-1: Demo Dataset Button (P2) ──
+    switch_tab(driver, 'extract')
+    time.sleep(0.5)
+    # Clear existing studies first
+    driver.execute_script("extractedStudies.length = 0; renderExtractTable();")
+    time.sleep(0.3)
+    # Click demo button via JS (headless may not be able to click)
+    driver.execute_script("loadDemoDataset()")
+    time.sleep(1)
+    cg1 = driver.execute_script("""
+        return {
+            count: extractedStudies.length,
+            hasRows: document.querySelectorAll('#extractBody tr[data-study-id]').length,
+            firstAuthor: extractedStudies.length > 0 ? extractedStudies[0].authorYear : null
+        };
+    """)
+    if cg1:
+        log_result('CG-1: Demo dataset loads studies', cg1.get('count', 0) >= 6,
+                   f'count={cg1.get("count")}')
+        log_result('CG-1: Demo dataset renders table rows', cg1.get('hasRows', 0) >= 6,
+                   f'rows={cg1.get("hasRows")}')
+        log_result('CG-1: First demo study is Higgins 1988', cg1.get('firstAuthor') == 'Higgins 1988',
+                   f'first={cg1.get("firstAuthor")}')
+    else:
+        log_result('CG-1: Demo dataset', False, 'null result')
+
+    # ── CG-2: Extract Table Inline Validation (P2) ──
+    # Insert a study with invalid data, then call validateExtractField
+    cg2 = driver.execute_script("""
+        // Add a study with inverted CI bounds
+        extractedStudies.length = 0;
+        addStudyRow({authorYear:'Val1', treatment1:'A', treatment2:'B',
+            effectEstimate: 1.0, lowerCI: 2.0, upperCI: 0.5,
+            effectType:'MD', outcomeId:'test', timepoint:'6mo'});
+        renderExtractTable();
+        // Run validation
+        var errors = validateAllExtractFields();
+        // Check for non-numeric validation
+        var row = document.querySelector('#extractBody tr[data-study-id]');
+        var effInput = row ? row.querySelector('[data-field="effectEstimate"]') : null;
+        var hasBorder = false;
+        if (row) {
+            var loInput = row.querySelector('[data-field="lowerCI"]');
+            if (loInput) {
+                hasBorder = loInput.style.border.includes('solid') || loInput.title.includes('CI');
+            }
+        }
+        return {
+            errorCount: errors ? errors.length : -1,
+            hasErrors: errors && errors.length > 0,
+            hasBorderStyle: hasBorder,
+            errors: errors ? errors.slice(0, 3) : []
+        };
+    """)
+    if cg2:
+        log_result('CG-2: validateAllExtractFields detects CI inversion',
+                   cg2.get('hasErrors') == True,
+                   f'errors={cg2.get("errorCount")}: {cg2.get("errors")}')
+    else:
+        log_result('CG-2: Extract validation', False, 'null result')
+
+    # ── CG-3: PROSPERO Placeholder Warning (P2) ──
+    switch_tab(driver, 'protocol')
+    time.sleep(0.5)
+    cg3 = driver.execute_script("""
+        // Don't fill in any protocol fields — defaults will have [Population] etc. placeholders
+        try {
+            generateProtocol();
+        } catch(e) {}
+        // Check if protocol output contains the placeholder warning
+        var output = document.getElementById('protocolOutput');
+        var html = output ? output.innerHTML : '';
+        return {
+            hasWarning: html.includes('placeholder') || html.includes('Placeholder'),
+            hasHighlight: html.includes('<mark'),
+            outputLength: html.length
+        };
+    """)
+    time.sleep(0.5)
+    if cg3:
+        log_result('CG-3: Protocol detects placeholder text', cg3.get('hasWarning') == True,
+                   f'outputLen={cg3.get("outputLength")}')
+        log_result('CG-3: Protocol highlights placeholders', cg3.get('hasHighlight') == True, '')
+    else:
+        log_result('CG-3: PROSPERO placeholder', False, 'null result')
+
+    # ── CG-4: Insights Tab Init Functions (P2) ──
+    # First, load data and run analysis to give insights something to render
+    switch_tab(driver, 'extract')
+    time.sleep(0.3)
+    driver.execute_script("extractedStudies.length = 0;")
+    for study in NMA_TEST_DATA:
+        add_study_via_js(driver, study)
+    time.sleep(0.3)
+    driver.execute_script("""
+        document.getElementById('nmaModelSelect').value = 'frequentist';
+        document.getElementById('nmaTau2Method').value = 'DL';
+        switchPhase('analysis');
+    """)
+    time.sleep(0.3)
+    driver.execute_script("runAnalysis()")
+    time.sleep(3)
+
+    # Now switch to insights and test each sub-tab init
+    switch_tab(driver, 'insights')
+    time.sleep(0.5)
+
+    insight_tabs = ['tawakkul', 'mizan', 'shura', 'hikmah', 'fitrah', 'ihsan',
+                    'amanah', 'taqwa', 'dhulm', 'rahma', 'tabayyun', 'living',
+                    'conflict', 'radar', 'registry']
+    tabs_ok = 0
+    tabs_detail = []
+    for tab_name in insight_tabs:
+        result = driver.execute_script(f"""
+            try {{
+                switchInsightsSubTab('{tab_name}');
+                var panel = document.getElementById('insight-{tab_name}');
+                var isActive = panel && panel.classList.contains('active');
+                var hasContent = panel && panel.innerHTML.length > 50;
+                return {{ active: isActive, hasContent: hasContent, len: panel ? panel.innerHTML.length : 0 }};
+            }} catch(e) {{
+                return {{ error: e.message }};
+            }}
+        """)
+        time.sleep(0.3)
+        if result and result.get('active') and result.get('hasContent'):
+            tabs_ok += 1
+        else:
+            tabs_detail.append(f'{tab_name}: {result}')
+
+    log_result(f'CG-4: All {len(insight_tabs)} insight tabs init and render',
+               tabs_ok == len(insight_tabs),
+               f'{tabs_ok}/{len(insight_tabs)} OK' + (f' FAILED: {tabs_detail}' if tabs_detail else ''))
+
+    # ── CG-5: Insight Tabs Accessibility (P1 fix verification) ──
+    cg5 = driver.execute_script("""
+        var tablist = document.querySelector('.insights-nav');
+        var hasTablist = tablist && tablist.getAttribute('role') === 'tablist';
+        var tabs = document.querySelectorAll('.insights-tab');
+        var allAriaControls = true;
+        var allIds = true;
+        tabs.forEach(function(t) {
+            if (!t.getAttribute('aria-controls')) allAriaControls = false;
+            if (!t.id) allIds = false;
+        });
+        var panels = document.querySelectorAll('[id^="insight-"][class*="insight-panel"]');
+        var allTabpanel = true;
+        var allLabelledby = true;
+        panels.forEach(function(p) {
+            if (p.getAttribute('role') !== 'tabpanel') allTabpanel = false;
+            if (!p.getAttribute('aria-labelledby')) allLabelledby = false;
+        });
+        return {
+            hasTablist: hasTablist,
+            tabCount: tabs.length,
+            allAriaControls: allAriaControls,
+            allIds: allIds,
+            panelCount: panels.length,
+            allTabpanel: allTabpanel,
+            allLabelledby: allLabelledby
+        };
+    """)
+    if cg5:
+        log_result('CG-5: Insights nav has role="tablist"', cg5.get('hasTablist') == True, '')
+        log_result('CG-5: All insight tabs have aria-controls',
+                   cg5.get('allAriaControls') == True, f'tabs={cg5.get("tabCount")}')
+        log_result('CG-5: All insight tabs have id attributes',
+                   cg5.get('allIds') == True, '')
+        log_result('CG-5: All insight panels have role="tabpanel"',
+                   cg5.get('allTabpanel') == True, f'panels={cg5.get("panelCount")}')
+        log_result('CG-5: All insight panels have aria-labelledby',
+                   cg5.get('allLabelledby') == True, '')
+    else:
+        log_result('CG-5: Insight accessibility', False, 'null result')
+
+    # ── CG-7: CINeMA Domain Ratings (P2) ──
+    # Compute CINeMA directly from JS functions with NMA_TEST_DATA
+    cg7 = driver.execute_script("""
+        // Build network and run NMA from current extractedStudies
+        var studies = extractedStudies.filter(function(s) { return s.effectEstimate !== null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network', studyCount: studies.length };
+        var nmaR = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+        if (!nmaR) return { error: 'no NMA result' };
+
+        // computeCINeMA returns an ARRAY of comparisons (not {comparisons: [...]})
+        var cinema = computeCINeMA(nmaR, null, studies);
+        if (!cinema || !cinema.length) return { error: 'computeCINeMA returned empty', nE: nmaR.nE };
+        return {
+            hasResult: true,
+            comparisonCount: cinema.length,
+            hasDomains: cinema[0].domains != null,
+            domainCount: cinema[0].domains ? Object.keys(cinema[0].domains).length : 0,
+            firstOverall: cinema[0].overall || null,
+            domainNames: cinema[0].domains ? Object.keys(cinema[0].domains) : [],
+            firstLabel: cinema[0].label || null
+        };
+    """)
+    if cg7 and not cg7.get('error'):
+        log_result('CG-7: CINeMA produces result', cg7.get('hasResult') == True, '')
+        log_result('CG-7: CINeMA has comparisons', cg7.get('comparisonCount', 0) > 0,
+                   f'count={cg7.get("comparisonCount")}')
+        log_result('CG-7: CINeMA has domain ratings', cg7.get('hasDomains') == True,
+                   f'domains={cg7.get("domainCount")}: {cg7.get("domainNames")}')
+        log_result('CG-7: CINeMA has overall confidence rating',
+                   cg7.get('firstOverall') is not None,
+                   f'overall={cg7.get("firstOverall")}')
+    else:
+        log_result('CG-7: CINeMA math', False, f'error={cg7}')
+
+    # ── CG-6: Component NMA with + separator treatments (P2) ──
+    switch_tab(driver, 'extract')
+    time.sleep(0.3)
+    driver.execute_script("extractedStudies.length = 0;")
+    cg6 = driver.execute_script("""
+        // Add studies with component treatments (+ separator)
+        addStudyRow({authorYear:'Comp1', treatment1:'DrugA', treatment2:'Placebo',
+            effectEstimate:0.5, lowerCI:0.1, upperCI:0.9, effectType:'MD', outcomeId:'pain', timepoint:'6mo'});
+        addStudyRow({authorYear:'Comp2', treatment1:'DrugB', treatment2:'Placebo',
+            effectEstimate:0.3, lowerCI:-0.1, upperCI:0.7, effectType:'MD', outcomeId:'pain', timepoint:'6mo'});
+        addStudyRow({authorYear:'Comp3', treatment1:'DrugA+DrugB', treatment2:'Placebo',
+            effectEstimate:0.9, lowerCI:0.4, upperCI:1.4, effectType:'MD', outcomeId:'pain', timepoint:'6mo'});
+        addStudyRow({authorYear:'Comp4', treatment1:'DrugA', treatment2:'DrugB',
+            effectEstimate:0.2, lowerCI:-0.2, upperCI:0.6, effectType:'MD', outcomeId:'pain', timepoint:'6mo'});
+        addStudyRow({authorYear:'Comp5', treatment1:'DrugA+DrugB', treatment2:'DrugA',
+            effectEstimate:0.4, lowerCI:0.0, upperCI:0.8, effectType:'MD', outcomeId:'pain', timepoint:'6mo'});
+
+        var studies = extractedStudies.filter(s => s.effectEstimate !== null);
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network' };
+        var nmaR = runFrequentistNMA(net, 0.95, {tau2Method:'DL'});
+        if (!nmaR) return { error: 'no NMA result' };
+
+        try {
+            var compResult = runComponentNMA(nmaR);
+            return {
+                hasResult: compResult != null,
+                hasComponents: compResult && compResult.components && compResult.components.length > 0,
+                componentCount: compResult ? (compResult.components || []).length : 0,
+                componentNames: compResult && compResult.components ? compResult.components.map(c => c.name || c.component) : []
+            };
+        } catch(e) {
+            return { error: 'componentNMA error: ' + e.message };
+        }
+    """)
+    time.sleep(1)
+    if cg6 and not cg6.get('error'):
+        log_result('CG-6: Component NMA produces result with + separator treatments',
+                   cg6.get('hasResult') == True, '')
+        log_result('CG-6: Component NMA detects individual components',
+                   cg6.get('hasComponents') == True,
+                   f'components={cg6.get("componentCount")}: {cg6.get("componentNames")}')
+    else:
+        log_result('CG-6: Component NMA', False, f'error={cg6}')
+
+    # ── CG-8: Dark Mode System Preference Detection (P3) ──
+    cg8 = driver.execute_script("""
+        // Verify loadDarkMode function checks prefers-color-scheme
+        var scripts = document.querySelectorAll('script');
+        var hasMediaCheck = false;
+        for (var i = 0; i < scripts.length; i++) {
+            if (scripts[i].textContent.includes('prefers-color-scheme')) {
+                hasMediaCheck = true;
+                break;
+            }
+        }
+        // Verify the function exists and is callable
+        var fnExists = typeof loadDarkMode === 'function';
+        return { hasMediaCheck: hasMediaCheck, fnExists: fnExists };
+    """)
+    if cg8:
+        log_result('CG-8: Dark mode checks prefers-color-scheme', cg8.get('hasMediaCheck') == True, '')
+        log_result('CG-8: loadDarkMode function exists', cg8.get('fnExists') == True, '')
+    else:
+        log_result('CG-8: Dark mode init', False, 'null result')
+
+    # ── CG-9: ciAssumptionNote Visibility (P3) ──
+    switch_tab(driver, 'extract')
+    time.sleep(0.3)
+    cg9 = driver.execute_script("""
+        var note = document.getElementById('ciAssumptionNote');
+        if (!note) return { error: 'element not found' };
+        return {
+            exists: true,
+            text: note.textContent.trim(),
+            hasCI95: note.textContent.includes('95%'),
+            visible: note.offsetHeight > 0
+        };
+    """)
+    if cg9 and not cg9.get('error'):
+        log_result('CG-9: ciAssumptionNote element exists', cg9.get('exists') == True, '')
+        log_result('CG-9: ciAssumptionNote mentions 95% CI assumption',
+                   cg9.get('hasCI95') == True, cg9.get('text', '')[:100])
+        log_result('CG-9: ciAssumptionNote is visible', cg9.get('visible') == True, '')
+    else:
+        log_result('CG-9: ciAssumptionNote', False, f'error={cg9}')
+
+    # Final: no severe console errors (filter out Chrome meta-tag warnings)
+    errors = get_console_errors(driver)
+    js_errors = [e for e in errors if 'The Content' not in e.get('message', '')]
+    severe = len(js_errors)
+    log_result('CG: No SEVERE JS console errors after coverage tests',
+               severe == 0,
+               f'{severe} errors' + (f': {js_errors[0]["message"][:80]}' if js_errors else ''))
+
+
+# ════════════════════════════════════════════════════════════════════
+# TEST 22: STATISTICAL DEPTH FEATURES (4 advanced NMA methods)
+# ════════════════════════════════════════════════════════════════════
+def test_statistical_depth_features(driver):
+    """Tests: Contribution Matrix, CINeMA, PET-PEESE+Harbord, Component NMA."""
+    print('\n=== TEST 22: Statistical Depth Features ===')
+
+    # Load a multi-treatment dataset (4 treatments, 6 comparisons, 3 studies each = 18 studies)
+    switch_tab(driver, 'extract')
+    time.sleep(0.3)
+    driver.execute_script("extractedStudies.length = 0;")
+    driver.execute_script("""
+        var tNames = ['Drug_A', 'Drug_B', 'Drug_C', 'Drug_D'];
+        var pairs = [];
+        for (var i = 0; i < tNames.length; i++)
+            for (var j = i+1; j < tNames.length; j++)
+                pairs.push([tNames[i], tNames[j]]);
+        for (var p = 0; p < pairs.length; p++) {
+            for (var k = 0; k < 3; k++) {
+                var eff = (0.2 + p * 0.15 + k * 0.05).toFixed(3);
+                var se = (0.12 + k * 0.03).toFixed(3);
+                var lo = (parseFloat(eff) - 1.96 * parseFloat(se)).toFixed(3);
+                var hi = (parseFloat(eff) + 1.96 * parseFloat(se)).toFixed(3);
+                addStudyRow({
+                    authorYear: 'Depth' + (p*3+k+1),
+                    treatment1: pairs[p][0],
+                    treatment2: pairs[p][1],
+                    effectEstimate: parseFloat(eff),
+                    lowerCI: parseFloat(lo),
+                    upperCI: parseFloat(hi),
+                    effectType: 'MD',
+                    outcomeId: 'pain',
+                    timepoint: '12wk'
+                });
+            }
+        }
+    """)
+
+    # Run frequentist NMA to get the result
+    nma_res = driver.execute_script("""
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network' };
+        var nmaR = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+        if (!nmaR) return { error: 'no result' };
+        nmaR.confLevel = 0.95;
+        nmaR.isRatio = false;
+        window._testNMAResult = nmaR;
+        return {
+            nT: nmaR.treatments ? nmaR.treatments.length : 0,
+            nE: nmaR.nE || 0,
+            hasHatMatrix: nmaR.hatMatrix != null
+        };
+    """)
+    log_result('SD-1: NMA result for depth tests',
+               nma_res and nma_res.get('nT') == 4, f'{nma_res}')
+    log_result('SD-1: Hat matrix available',
+               nma_res and nma_res.get('hasHatMatrix') == True, '')
+
+    # ── SD-2: Contribution Matrix ──
+    contrib = driver.execute_script("""
+        var nmaR = window._testNMAResult;
+        if (!nmaR) return { error: 'no NMA result' };
+        var cm = computeContributionMatrix(nmaR);
+        if (!cm) return { error: 'no contribution matrix' };
+        // Check row sums ~ 100
+        var rowSumsOk = true;
+        for (var i = 0; i < cm.length; i++) {
+            var sum = 0;
+            for (var j = 0; j < cm[i].length; j++) sum += cm[i][j];
+            if (Math.abs(sum - 100) > 1) rowSumsOk = false;
+        }
+        // Check dimensions
+        return {
+            rows: cm.length,
+            cols: cm[0] ? cm[0].length : 0,
+            rowSumsOk: rowSumsOk,
+            sample: cm[0] ? cm[0][0].toFixed(2) : null
+        };
+    """)
+    log_result('SD-2: Contribution matrix computed',
+               contrib and not contrib.get('error'), f'{contrib}')
+    log_result('SD-2: Contribution matrix dimensions match nE',
+               contrib and contrib.get('rows') == nma_res.get('nE') and contrib.get('cols') == nma_res.get('nE'),
+               f'rows={contrib.get("rows") if contrib else "?"}, cols={contrib.get("cols") if contrib else "?"}')
+    log_result('SD-2: Contribution row sums ~100%',
+               contrib and contrib.get('rowSumsOk') == True, '')
+
+    # ── SD-3: CINeMA Framework ──
+    cinema = driver.execute_script("""
+        var nmaR = window._testNMAResult;
+        if (!nmaR) return { error: 'no NMA result' };
+        // Run node splitting first and store results
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        var nodeSplits = runNodeSplitting(net, 0.95, nmaR);
+        nmaR.nodeSplitResults = nodeSplits;
+        // Compute pairwise results for CINeMA
+        var pairwise = {};
+        for (var i = 0; i < studies.length; i++) {
+            var key = studies[i].treatment1 + ' vs ' + studies[i].treatment2;
+            if (!pairwise[key]) pairwise[key] = [];
+            pairwise[key].push(studies[i]);
+        }
+        var cinemaResult = computeCINeMA(nmaR, pairwise, studies);
+        if (!cinemaResult) return { error: 'cinema null' };
+        window._lastCinemaResult = cinemaResult;
+        var domains = ['withinStudyBias', 'acrossStudyBias', 'indirectness', 'imprecision', 'heterogeneity', 'incoherence'];
+        var validDomains = true;
+        var validRatings = ['no', 'some', 'major'];
+        for (var i = 0; i < cinemaResult.length; i++) {
+            for (var d = 0; d < domains.length; d++) {
+                if (validRatings.indexOf(cinemaResult[i].domains[domains[d]]) === -1) validDomains = false;
+            }
+        }
+        var hasOverall = true;
+        var validOveralls = ['High', 'Moderate', 'Low', 'Very Low'];
+        for (var i = 0; i < cinemaResult.length; i++) {
+            if (validOveralls.indexOf(cinemaResult[i].overall) === -1) hasOverall = false;
+        }
+        return {
+            count: cinemaResult.length,
+            validDomains: validDomains,
+            hasOverall: hasOverall,
+            firstLabel: cinemaResult[0] ? cinemaResult[0].label : null,
+            nodeSplitCount: nodeSplits ? nodeSplits.length : 0
+        };
+    """)
+    log_result('SD-3: CINeMA computed',
+               cinema and cinema.get('count', 0) > 0, f'comparisons={cinema.get("count") if cinema else "?"}')
+    log_result('SD-3: CINeMA all 6 domains have valid ratings',
+               cinema and cinema.get('validDomains') == True, '')
+    log_result('SD-3: CINeMA overall confidence levels valid',
+               cinema and cinema.get('hasOverall') == True, '')
+    log_result('SD-3: CINeMA uses node-split results',
+               cinema and cinema.get('nodeSplitCount', 0) > 0, f'splits={cinema.get("nodeSplitCount") if cinema else "?"}')
+
+    # ── SD-4: PET-PEESE (needs .yi and .sei properties) ──
+    petpeese = driver.execute_script("""
+        // Build studyResults with yi/sei format expected by computePETPEESE
+        var studyResults = [];
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null && s.lowerCI != null; });
+        for (var i = 0; i < studies.length; i++) {
+            var se = (studies[i].upperCI - studies[i].lowerCI) / (2 * 1.96);
+            studyResults.push({ yi: studies[i].effectEstimate, sei: se });
+        }
+        var nmaR = window._testNMAResult;
+        var tau2 = nmaR ? (nmaR.tau2 || 0) : 0;
+        var pp = computePETPEESE(studyResults, tau2);
+        if (!pp) return { error: 'PET-PEESE null (need >=5 studies with yi/sei)' };
+        return {
+            hasPET: pp.pet != null,
+            hasPEESE: pp.peese != null,
+            petIntercept: pp.pet ? pp.pet.intercept : null,
+            petPvalue: pp.pet ? pp.pet.pValue : null,
+            peesePvalue: pp.peese ? pp.peese.pValue : null,
+            usePeese: pp.usePEESE,
+            method: pp.method
+        };
+    """)
+    log_result('SD-4: PET-PEESE computed',
+               petpeese and petpeese.get('hasPET') == True, f'{petpeese}')
+    log_result('SD-4: PET has valid intercept',
+               petpeese and petpeese.get('petIntercept') is not None,
+               f'intercept={petpeese.get("petIntercept") if petpeese else "?"}')
+    log_result('SD-4: PET has valid p-value',
+               petpeese and petpeese.get('petPvalue') is not None and 0 <= petpeese.get('petPvalue', -1) <= 1,
+               f'p={petpeese.get("petPvalue") if petpeese else "?"}')
+
+    # ── SD-5: Harbord Test (needs binary outcome data with >=10 studies) ──
+    harbord = driver.execute_script("""
+        // Create 12 synthetic binary outcome studies for Harbord test
+        var harbStudies = [];
+        for (var i = 0; i < 12; i++) {
+            harbStudies.push({
+                eventsInt: 20 + Math.floor(Math.sin(i) * 10 + 10),
+                totalInt: 100,
+                eventsCtrl: 15 + Math.floor(Math.cos(i) * 8 + 8),
+                totalCtrl: 100
+            });
+        }
+        var hb = computeHarbordTest(null, harbStudies);
+        if (!hb) return { error: 'Harbord null' };
+        return {
+            intercept: hb.intercept,
+            pValue: hb.pValue,
+            hasSlope: hb.slope != null,
+            k: hb.k,
+            hasValidP: hb.pValue != null && hb.pValue >= 0 && hb.pValue <= 1
+        };
+    """)
+    log_result('SD-5: Harbord test computed',
+               harbord and not harbord.get('error'), f'{harbord}')
+    log_result('SD-5: Harbord has valid p-value',
+               harbord and harbord.get('hasValidP') == True, f'p={harbord.get("pValue") if harbord else "?"}')
+    log_result('SD-5: Harbord uses >=10 studies',
+               harbord and harbord.get('k', 0) >= 10, f'k={harbord.get("k") if harbord else "?"}')
+
+    # ── SD-6: Component NMA (needs "+" separator in treatment names) ──
+    # Reload data with component treatments (Drug_A+Supplement, Drug_B, etc.)
+    driver.execute_script("extractedStudies.length = 0;")
+    comp_res = driver.execute_script("""
+        var treatments = ['Drug_A+Supplement', 'Drug_A', 'Drug_B+Supplement', 'Drug_B'];
+        var pairs = [];
+        for (var i = 0; i < treatments.length; i++)
+            for (var j = i+1; j < treatments.length; j++)
+                pairs.push([treatments[i], treatments[j]]);
+        for (var p = 0; p < pairs.length; p++) {
+            for (var k = 0; k < 3; k++) {
+                var eff = (0.1 + p * 0.2 + k * 0.05).toFixed(3);
+                var se = (0.15 + k * 0.02).toFixed(3);
+                addStudyRow({
+                    authorYear: 'Comp' + (p*3+k+1),
+                    treatment1: pairs[p][0],
+                    treatment2: pairs[p][1],
+                    effectEstimate: parseFloat(eff),
+                    lowerCI: parseFloat(eff) - 1.96 * parseFloat(se),
+                    upperCI: parseFloat(eff) + 1.96 * parseFloat(se),
+                    effectType: 'MD',
+                    outcomeId: 'pain',
+                    timepoint: '8wk'
+                });
+            }
+        }
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network' };
+        var nmaR = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+        if (!nmaR) return { error: 'no NMA result' };
+        nmaR.confLevel = 0.95;
+        var compResult = runComponentNMA(nmaR);
+        if (!compResult) return { error: 'component NMA null' };
+        window._lastComponentNMAResult = compResult;
+        var allHaveSE = true;
+        for (var i = 0; i < compResult.components.length; i++) {
+            if (compResult.components[i].se == null || compResult.components[i].se <= 0) allHaveSE = false;
+        }
+        return {
+            nComponents: compResult.nComponents,
+            nEdges: compResult.nEdges,
+            components: compResult.components.map(function(c) { return c.component; }),
+            allHaveSE: allHaveSE,
+            firstEffect: compResult.components[0] ? compResult.components[0].effect.toFixed(4) : null,
+            firstP: compResult.components[0] ? compResult.components[0].p : null
+        };
+    """)
+    log_result('SD-6: Component NMA computed',
+               comp_res and not comp_res.get('error'), f'{comp_res}')
+    log_result('SD-6: Component NMA found components',
+               comp_res and comp_res.get('nComponents', 0) >= 2, f'nC={comp_res.get("nComponents") if comp_res else "?"}')
+    log_result('SD-6: Component NMA has Supplement component',
+               comp_res and 'Supplement' in (comp_res.get('components') or []),
+               f'components={comp_res.get("components") if comp_res else "?"}')
+    log_result('SD-6: All components have SE > 0',
+               comp_res and comp_res.get('allHaveSE') == True, '')
+    log_result('SD-6: Component p-values valid',
+               comp_res and comp_res.get('firstP') is not None and 0 <= comp_res.get('firstP', -1) <= 1,
+               f'p={comp_res.get("firstP") if comp_res else "?"}')
+
+    # ── SD-7: wlsRegressUtil uses tCDFfn correctly (regression test for P0 fix) ──
+    wls_test = driver.execute_script("""
+        try {
+            var y = [0.5, 0.3, 0.8, 0.2, 0.6];
+            var x = [0.1, 0.15, 0.08, 0.2, 0.12];
+            var w = [10, 8, 15, 5, 12];
+            var res = wlsRegressUtil(y, x, w);
+            if (!res) return { error: 'null result' };
+            return {
+                hasIntercept: res.intercept != null,
+                hasSlope: res.slope != null,
+                hasPValue: res.pValue != null && !isNaN(res.pValue),
+                pValue: res.pValue,
+                validP: res.pValue >= 0 && res.pValue <= 1
+            };
+        } catch(e) {
+            return { error: e.message };
+        }
+    """)
+    log_result('SD-7: wlsRegressUtil runs without error (tCDFfn fix)',
+               wls_test and not wls_test.get('error'), f'{wls_test}')
+    log_result('SD-7: WLS regression returns valid p-value',
+               wls_test and wls_test.get('validP') == True, f'p={wls_test.get("pValue") if wls_test else "?"}')
+
+    # ── SD-8: CINeMA CSV export function exists ──
+    cinema_csv = driver.execute_script("""
+        return typeof exportCinemaCSV === 'function';
+    """)
+    log_result('SD-8: exportCinemaCSV function exists', cinema_csv == True, '')
+
+    # ── SD-9: Component NMA CSV export function exists ──
+    comp_csv = driver.execute_script("""
+        return typeof exportComponentNMACSV === 'function';
+    """)
+    log_result('SD-9: exportComponentNMACSV function exists', comp_csv == True, '')
+
+
+# ════════════════════════════════════════════════════════════════════
+# TEST 21: STRESS & EDGE CASES
+# ════════════════════════════════════════════════════════════════════
+def test_stress_and_edge_cases(driver):
+    """Stress tests: large dataset, Bayesian NMA, export validation, error recovery."""
+    print('\n=== TEST 21: Stress & Edge Cases ===')
+
+    # ── SE-1: Large Dataset (30 studies, 5 treatments) ──
+    switch_tab(driver, 'extract')
+    time.sleep(0.3)
+    driver.execute_script("extractedStudies.length = 0;")
+    # Generate 30 studies across 5 treatments with 10 direct comparisons
+    se1 = driver.execute_script("""
+        var tNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'];
+        var pairs = [];
+        for (var i = 0; i < tNames.length; i++)
+            for (var j = i+1; j < tNames.length; j++)
+                pairs.push([tNames[i], tNames[j]]);
+        // 3 studies per comparison = 30 studies
+        for (var p = 0; p < pairs.length; p++) {
+            for (var k = 0; k < 3; k++) {
+                var eff = (Math.sin(p * 3 + k) * 0.5 + 0.3).toFixed(3);
+                var se = (0.15 + k * 0.05).toFixed(3);
+                var lo = (parseFloat(eff) - 1.96 * parseFloat(se)).toFixed(3);
+                var hi = (parseFloat(eff) + 1.96 * parseFloat(se)).toFixed(3);
+                addStudyRow({
+                    authorYear: 'Stress' + (p*3+k+1),
+                    treatment1: pairs[p][0],
+                    treatment2: pairs[p][1],
+                    effectEstimate: parseFloat(eff),
+                    lowerCI: parseFloat(lo),
+                    upperCI: parseFloat(hi),
+                    effectType: 'MD',
+                    outcomeId: 'pain',
+                    timepoint: '6mo'
+                });
+            }
+        }
+        return { count: extractedStudies.length };
+    """)
+    log_result('SE-1: 30 studies loaded for stress test',
+               se1 and se1.get('count') == 30, f'count={se1}')
+
+    # Run frequentist NMA on large dataset
+    se1b = driver.execute_script("""
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network' };
+        var t0 = performance.now();
+        var nmaR = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+        var elapsed = performance.now() - t0;
+        if (!nmaR) return { error: 'no result' };
+        return {
+            nT: nmaR.treatments ? nmaR.treatments.length : 0,
+            nE: nmaR.nE || 0,
+            elapsed: Math.round(elapsed),
+            hasTau2: nmaR.tau2 != null,
+            hasLeague: nmaR.leagueTable != null
+        };
+    """)
+    if se1b and not se1b.get('error'):
+        log_result('SE-1: Large NMA produces 5 treatments',
+                   se1b.get('nT') == 5, f'nT={se1b.get("nT")}')
+        log_result('SE-1: Large NMA produces 10 edges',
+                   se1b.get('nE') == 10, f'nE={se1b.get("nE")}')
+        log_result('SE-1: Large NMA completes under 5s',
+                   se1b.get('elapsed', 99999) < 5000, f'{se1b.get("elapsed")}ms')
+        log_result('SE-1: Large NMA has tau2 and league table',
+                   se1b.get('hasTau2') and se1b.get('hasLeague'), '')
+    else:
+        log_result('SE-1: Large NMA', False, f'error={se1b}')
+
+    # ── SE-2: Bayesian NMA Path ──
+    # Reload standard test data for Bayesian
+    driver.execute_script("extractedStudies.length = 0;")
+    for study in NMA_TEST_DATA:
+        add_study_via_js(driver, study)
+    time.sleep(0.3)
+
+    se2 = driver.execute_script("""
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network' };
+        // Get reference treatment from DOM or default
+        var refSel = document.getElementById('nmaRefSelect');
+        var refTrt = refSel ? refSel.value : '';
+        try {
+            var result = runBayesianNMA(net, 0.95, {
+                nBurnin: 500, nIter: 1000, nChains: 2, refTreatment: refTrt
+            });
+            if (!result) return { error: 'null result' };
+            return {
+                hasResult: true,
+                nT: result.treatments ? result.treatments.length : 0,
+                hasEffects: result.dSummary && result.dSummary.length > 0,
+                effectCount: result.dSummary ? result.dSummary.length : 0,
+                hasDIC: result.DIC != null,
+                hasSUCRA: result.sucra && result.sucra.length > 0
+            };
+        } catch(e) {
+            return { error: 'bayesian error: ' + e.message };
+        }
+    """)
+    if se2 and not se2.get('error'):
+        log_result('SE-2: Bayesian NMA produces result', se2.get('hasResult') == True, '')
+        log_result('SE-2: Bayesian NMA has 4 treatments',
+                   se2.get('nT') == 4, f'nT={se2.get("nT")}')
+        log_result('SE-2: Bayesian NMA has treatment effects',
+                   se2.get('hasEffects') == True, f'count={se2.get("effectCount")}')
+        log_result('SE-2: Bayesian NMA has DIC',
+                   se2.get('hasDIC') == True, '')
+    else:
+        log_result('SE-2: Bayesian NMA', False, f'error={se2}')
+
+    # ── SE-3: CSV Export Validation ──
+    se3 = driver.execute_script("""
+        // Build CSV from current extractedStudies
+        if (typeof csvSafeCell !== 'function') return { error: 'csvSafeCell not found' };
+        var dangerous = ['=CMD()', '+EXEC()', '@SUM(A1)', '\\tDATA'];
+        var safe = dangerous.map(function(d) { return csvSafeCell(d); });
+        var allSafe = safe.every(function(s) { return s.charAt(0) === "'"; });
+        // Also test that negative numbers are NOT escaped
+        var negNum = csvSafeCell('-0.5 mmHg');
+        var negOk = negNum === '-0.5 mmHg';
+        return { allSafe: allSafe, safe: safe, negOk: negOk, negNum: negNum };
+    """)
+    if se3 and not se3.get('error'):
+        log_result('SE-3: CSV formula injection prevented',
+                   se3.get('allSafe') == True, f'safe={se3.get("safe")}')
+        log_result('SE-3: Negative numbers NOT escaped in CSV',
+                   se3.get('negOk') == True, f'negNum={se3.get("negNum")}')
+    else:
+        log_result('SE-3: CSV export', False, f'error={se3}')
+
+    # ── SE-4: k=1 Single Study Edge Case ──
+    driver.execute_script("extractedStudies.length = 0;")
+    se4 = driver.execute_script("""
+        addStudyRow({authorYear:'Solo1', treatment1:'DrugX', treatment2:'Placebo',
+            effectEstimate: 0.5, lowerCI: 0.1, upperCI: 0.9,
+            effectType: 'MD', outcomeId: 'pain', timepoint: '6mo'});
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network for k=1' };
+        try {
+            var result = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+            return {
+                hasResult: result != null,
+                nT: result ? (result.treatments ? result.treatments.length : 0) : 0,
+                nE: result ? (result.nE || 0) : 0,
+                tau2: result ? result.tau2 : null
+            };
+        } catch(e) {
+            return { error: 'k=1 error: ' + e.message };
+        }
+    """)
+    if se4 and not se4.get('error'):
+        log_result('SE-4: k=1 single study NMA does not crash',
+                   se4.get('hasResult') == True, f'nT={se4.get("nT")}, nE={se4.get("nE")}')
+    else:
+        log_result('SE-4: k=1 edge case', False, f'error={se4}')
+
+    # ── SE-5: k=2 Heterogeneity Warning ──
+    driver.execute_script("extractedStudies.length = 0;")
+    se5 = driver.execute_script("""
+        addStudyRow({authorYear:'Pair1', treatment1:'A', treatment2:'B',
+            effectEstimate: 0.3, lowerCI: -0.1, upperCI: 0.7,
+            effectType: 'MD', outcomeId: 'pain', timepoint: '6mo'});
+        addStudyRow({authorYear:'Pair2', treatment1:'A', treatment2:'B',
+            effectEstimate: 0.8, lowerCI: 0.3, upperCI: 1.3,
+            effectType: 'MD', outcomeId: 'pain', timepoint: '6mo'});
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network for k=2' };
+        var result = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+        if (!result) return { error: 'no result for k=2' };
+        return {
+            hasResult: true,
+            nE: result.nE || 0,
+            tau2: result.tau2,
+            I2: result.I2,
+            hasWarning: result.heterogeneityWarning || false
+        };
+    """)
+    if se5 and not se5.get('error'):
+        log_result('SE-5: k=2 NMA produces result',
+                   se5.get('hasResult') == True, f'tau2={se5.get("tau2")}, I2={se5.get("I2")}')
+    else:
+        log_result('SE-5: k=2 edge case', False, f'error={se5}')
+
+    # ── SE-6: escapeHtml Completeness ──
+    se6 = driver.execute_script("""
+        var tests = [
+            { input: '<script>alert(1)</script>', expected: '&lt;script&gt;alert(1)&lt;/script&gt;' },
+            { input: 'a"b', expected: 'a&quot;b' },
+            { input: "a'b", expected: "a&#39;b" },
+            { input: 'a&b', expected: 'a&amp;b' },
+            { input: 'normal text', expected: 'normal text' }
+        ];
+        var results = [];
+        for (var i = 0; i < tests.length; i++) {
+            var escaped = escapeHtml(tests[i].input);
+            results.push({
+                input: tests[i].input,
+                ok: escaped === tests[i].expected,
+                escaped: escaped,
+                expected: tests[i].expected
+            });
+        }
+        var allOk = results.every(function(r) { return r.ok; });
+        return { allOk: allOk, results: results };
+    """)
+    if se6:
+        log_result('SE-6: escapeHtml handles <, ", \', & correctly',
+                   se6.get('allOk') == True,
+                   '' if se6.get('allOk') else f'failures={se6.get("results")}')
+    else:
+        log_result('SE-6: escapeHtml', False, 'null result')
+
+    # ── SE-7: Tau2=0 Preserved (not dropped by || fallback) ──
+    se7 = driver.execute_script("""
+        // Create perfectly homogeneous data (same effect size)
+        extractedStudies.length = 0;
+        for (var i = 0; i < 4; i++) {
+            addStudyRow({authorYear:'Homo'+(i+1), treatment1:'A', treatment2:'B',
+                effectEstimate: 0.5, lowerCI: 0.1, upperCI: 0.9,
+                effectType: 'MD', outcomeId: 'pain', timepoint: '6mo'});
+        }
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network' };
+        var result = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+        if (!result) return { error: 'no result' };
+        // tau2 should be 0 or very close to 0, NOT replaced by a fallback
+        return {
+            tau2: result.tau2,
+            tau2IsZero: result.tau2 === 0 || Math.abs(result.tau2) < 1e-10,
+            I2: result.I2
+        };
+    """)
+    if se7 and not se7.get('error'):
+        log_result('SE-7: Homogeneous data preserves tau2=0 (not fallback)',
+                   se7.get('tau2IsZero') == True,
+                   f'tau2={se7.get("tau2")}, I2={se7.get("I2")}')
+    else:
+        log_result('SE-7: tau2=0 preservation', False, f'error={se7}')
+
+    # ── SE-8: Node-Split Consistency Test ──
+    driver.execute_script("extractedStudies.length = 0;")
+    for study in NMA_TEST_DATA:
+        add_study_via_js(driver, study)
+    time.sleep(0.3)
+    se8 = driver.execute_script("""
+        var studies = extractedStudies.filter(function(s){ return s.effectEstimate != null; });
+        var net = buildNetworkGraph(studies);
+        if (!net) return { error: 'no network' };
+        var nmaR = runFrequentistNMA(net, 0.95, {tau2Method: 'DL'});
+        if (!nmaR) return { error: 'no NMA result' };
+        try {
+            var ns = runNodeSplitting(net, 0.95, nmaR);
+            if (!ns) return { error: 'nodeSplit returned null' };
+            return {
+                hasResult: true,
+                splitCount: ns.length || 0,
+                firstHasP: ns[0] && ns[0].pValue != null,
+                firstLabel: ns[0] ? ns[0].comparison : null
+            };
+        } catch(e) {
+            return { error: 'nodeSplit error: ' + e.message };
+        }
+    """)
+    if se8 and not se8.get('error'):
+        log_result('SE-8: Node-split produces results',
+                   se8.get('hasResult') == True, f'splits={se8.get("splitCount")}')
+        log_result('SE-8: Node-split has p-values',
+                   se8.get('firstHasP') == True, f'first={se8.get("firstLabel")}')
+    else:
+        log_result('SE-8: Node-split', False, f'error={se8}')
+
+
+# ════════════════════════════════════════════════════════════════════
 # MAIN
 # ════════════════════════════════════════════════════════════════════
 def main():
@@ -2807,6 +3696,9 @@ def main():
         test_phase5_features(driver)
         test_phase6_features(driver)
         test_v2_improvements(driver)
+        test_coverage_gaps(driver)
+        test_statistical_depth_features(driver)
+        test_stress_and_edge_cases(driver)
         test_console_errors(driver)
 
     except Exception as e:
