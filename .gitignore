@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.serena/
+*.output
+*.backup*
+docs/plans/
+docs/superpowers/

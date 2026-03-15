@@ -1,0 +1,17 @@
+{
+  "schema": "r_parity.v1",
+  "snapshot_date": "2026-03-14",
+  "methods": {
+    "dl_tau2": { "status": "validated", "r_function": "netmeta(method.tau='DL')", "tolerance": 0.001 },
+    "reml_tau2": { "status": "validated", "r_function": "netmeta(method.tau='REML')", "tolerance": 0.01 },
+    "treatment_effects": { "status": "validated", "r_function": "net$TE.random", "tolerance": 0.005 },
+    "standard_errors": { "status": "validated", "r_function": "net$seTE.random", "tolerance": 0.005 },
+    "pscores": { "status": "validated", "r_function": "netrank()$Pscore.random", "tolerance": 0.02 },
+    "heterogeneity": { "status": "validated", "r_function": "net$I2, net$Q", "tolerance_I2": 2.0, "tolerance_Q": 0.5 },
+    "hksj": { "status": "validated", "r_function": "netmeta(hakn=TRUE)", "tolerance": 0.05 },
+    "node_splitting": { "status": "validated", "r_function": "netsplit()", "tolerance_p": 0.05 },
+    "prediction_intervals": { "status": "validated", "r_function": "net$lower.predict", "tolerance": 0.10 },
+    "bayesian_posteriors": { "status": "pre_computed", "r_function": "gemtc::mtc.run()", "tolerance": 0.05 },
+    "contribution_matrix": { "status": "planned", "r_function": "netcontrib()", "tolerance": 0.02 }
+  }
+}

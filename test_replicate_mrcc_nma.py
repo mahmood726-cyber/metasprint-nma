@@ -37,15 +37,15 @@ FILE_URL = 'file:///' + HTML_PATH.replace('\\', '/')
 TRIALS = [
     {'nctId': 'NCT02231749', 'pmid': '29562145', 'title': 'CheckMate 214 (Nivo+Ipi)',
      'authors': 'Motzer RJ', 'year': '2018', 'doi': '10.1056/NEJMoa1712126', 'source': 'ctgov'},
-    {'nctId': 'NCT02853331', 'pmid': '30779531', 'title': 'KEYNOTE-426 (Pembro+Axi)',
+    {'nctId': 'NCT02853331', 'pmid': '30779529', 'title': 'KEYNOTE-426 (Pembro+Axi)',
      'authors': 'Rini BI', 'year': '2019', 'doi': '10.1056/NEJMoa1816714', 'source': 'ctgov'},
-    {'nctId': 'NCT03141177', 'pmid': '33369633', 'title': 'CheckMate 9ER (Nivo+Cabo)',
+    {'nctId': 'NCT03141177', 'pmid': '33657295', 'title': 'CheckMate 9ER (Nivo+Cabo)',
      'authors': 'Choueiri TK', 'year': '2021', 'doi': '10.1056/NEJMoa2026982', 'source': 'ctgov'},
-    {'nctId': 'NCT02684006', 'pmid': '31498785', 'title': 'JAVELIN Renal 101 (Ave+Axi)',
+    {'nctId': 'NCT02684006', 'pmid': '30779531', 'title': 'JAVELIN Renal 101 (Ave+Axi)',
      'authors': 'Motzer RJ', 'year': '2019', 'doi': '10.1056/NEJMoa1816047', 'source': 'ctgov'},
     {'nctId': 'NCT02811861', 'pmid': '33616314', 'title': 'CLEAR (Pembro+Lenva)',
      'authors': 'Motzer RJ', 'year': '2021', 'doi': '10.1056/NEJMoa2035716', 'source': 'ctgov'},
-    {'nctId': 'NCT02420821', 'pmid': '31530160', 'title': 'IMmotion151 (Atez+Bev)',
+    {'nctId': 'NCT02420821', 'pmid': '31079938', 'title': 'IMmotion151 (Atez+Bev)',
      'authors': 'Rini BI', 'year': '2019', 'doi': '10.1016/S0140-6736(19)32008-2', 'source': 'ctgov'},
 ]
 
