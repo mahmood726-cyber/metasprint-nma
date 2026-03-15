@@ -235,7 +235,7 @@ Figure 5. Tool comparison table (23 features x 5 tools) and reviewer evidence pa
 | Test suite | 14 test files (97 core + 410+ comprehensive) | All passing | Re-run |
 | Gold standard | 3 canonical datasets | Automated | Capture screenshot |
 | Figures | 5 PNG files | Generated | Convert to TIFF 300 DPI |
-| Repository | [TO_BE_ADDED_GITHUB_URL] | Placeholder | Create public repo |
+| Repository | https://github.com/mahmood726-cyber/metasprint-nma | Placeholder | Create public repo |
 | Zenodo DOI | [TO_BE_ADDED_ZENODO_DOI] | Placeholder | Archive release |
 
 ## Software availability
@@ -244,7 +244,7 @@ Figure 5. Tool comparison table (23 features x 5 tools) and reviewer evidence pa
 - Language: HTML5/JavaScript (ES2020), no compilation required
 - Runtime: Any modern browser (Chrome >= 90, Firefox >= 90, Edge >= 90, Safari >= 15)
 - Dependencies: WebR v0.4.4 (https://webr.r-wasm.org, loaded on demand for R validation only)
-- Repository: [TO_BE_ADDED_GITHUB_URL]
+- Repository: https://github.com/mahmood726-cyber/metasprint-nma
 - DOI: [TO_BE_ADDED_ZENODO_DOI]
 - License: MIT (see LICENSE file)
 - Tests: 14 test files (97 core Selenium tests + 410+ comprehensive assertions)
