@@ -2,8 +2,8 @@
 
 ## Authors
 - Mahmood Ahmad [1,2]
-- [AUTHOR_2_PLACEHOLDER]
-- Corresponding author: [CORRESPONDING_EMAIL_PLACEHOLDER]
+- Additional co-author details to be finalized for submission.
+- Corresponding author email to be finalized for submission.
 
 ## Affiliations
 1. Royal Free Hospital, London, United Kingdom
@@ -235,8 +235,8 @@ Figure 5. Tool comparison table (23 features x 5 tools) and reviewer evidence pa
 | Test suite | 14 test files (97 core + 410+ comprehensive) | All passing | Re-run |
 | Gold standard | 3 canonical datasets | Automated | Capture screenshot |
 | Figures | 5 PNG files | Generated | Convert to TIFF 300 DPI |
-| Repository | https://github.com/mahmood726-cyber/metasprint-nma | Placeholder | Create public repo |
-| Zenodo DOI | [TO_BE_ADDED_ZENODO_DOI] | Placeholder | Archive release |
+| Repository | https://github.com/mahmood726-cyber/metasprint-nma | Available | Public repo live |
+| Zenodo DOI | Pending tagged GitHub release and Zenodo archive | Pending | Archive release |
 
 ## Software availability
 - Source: metasprint-nma.html (single file, approximately 31,500 lines)
@@ -245,7 +245,7 @@ Figure 5. Tool comparison table (23 features x 5 tools) and reviewer evidence pa
 - Runtime: Any modern browser (Chrome >= 90, Firefox >= 90, Edge >= 90, Safari >= 15)
 - Dependencies: WebR v0.4.4 (https://webr.r-wasm.org, loaded on demand for R validation only)
 - Repository: https://github.com/mahmood726-cyber/metasprint-nma
-- DOI: [TO_BE_ADDED_ZENODO_DOI]
+- DOI: Pending tagged GitHub release and Zenodo archive
 - License: MIT (see LICENSE file)
 - Tests: 14 test files (97 core Selenium tests + 410+ comprehensive assertions)
 - Validation artifacts: f1000_artifacts/validation_summary.md, f1000_artifacts/tutorial_walkthrough.md

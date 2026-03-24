@@ -1,0 +1,2 @@
+# MetaSprint NMA browser validation dependencies
+selenium>=4.15.0

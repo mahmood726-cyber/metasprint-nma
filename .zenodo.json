@@ -1,0 +1,20 @@
+{
+  "title": "MetaSprint NMA",
+  "description": "Zenodo metadata stub for the MetaSprint NMA release.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Ahmad, Mahmood"
+    }
+  ],
+  "keywords": [
+    "network meta-analysis",
+    "browser application",
+    "evidence synthesis",
+    "WebR",
+    "F1000Research"
+  ],
+  "notes": "Mint the DOI from the next tagged GitHub release and update this record as needed."
+}
