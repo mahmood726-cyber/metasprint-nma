@@ -21244,8 +21244,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);max-width:300px" title="' + escapeHtml(s.title || '') + '">' + escapeHtml(titleShort) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right;font-family:monospace">' + effVal + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right;font-family:monospace;font-size:0.78rem">' + ciVal + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + (s.enrollment || '?') + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (s.phase || '?') + '</td>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + escapeHtml(String(s.enrollment || '?')) + '</td>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + escapeHtml(String(s.phase || '?')) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap">' + escapeHtml(String(s.start_date || '?')) + '</td>';
       html += '</tr>';
     }
@@ -21338,8 +21338,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)" title="' + escapeHtml(titleTooltip) + '">' + escapeHtml(titleShort) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:0.78rem" title="' + escapeHtml(ivs) + '">' + escapeHtml(ivs) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:0.78rem" title="' + escapeHtml(ocs) + '">' + escapeHtml(ocs) + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + (t.enrollment || '?') + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (t.phase || '?') + '</td>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + escapeHtml(String(t.enrollment || '?')) + '</td>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + escapeHtml(String(t.phase || '?')) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (t.startYear || '?') + '</td>';
       var srcBadge = t.source === 'aact'
         ? '<span style="background:#22d3ee;color:#0e1b27;padding:1px 5px;border-radius:3px;font-size:0.7rem;font-weight:600">AACT</span>'
@@ -21517,8 +21517,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       html += '<tr style="' + rowBg + '"><td style="padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap">' + nctLink + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)" title="' + escapeHtml(t.title || '') + '">' + escapeHtml(titleShort) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:0.78rem">' + escapeHtml(ivs) + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + (t.enrollment || '?') + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (t.phase || '?') + '</td>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + escapeHtml(String(t.enrollment || '?')) + '</td>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + escapeHtml(String(t.phase || '?')) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (t.startYear || '?') + '</td></tr>';
     }
     html += '</tbody></table></div>';
@@ -24860,8 +24860,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
         var titleShort = (t.title || '').length > 50 ? t.title.substring(0, 47) + '...' : (t.title || '');
         html += '<tr><td style="padding:3px 6px;border-bottom:1px solid var(--border)">' + nctLink + '</td>';
         html += '<td style="padding:3px 6px;border-bottom:1px solid var(--border)" title="' + escapeHtml(t.title || '') + '">' + escapeHtml(titleShort) + '</td>';
-        html += '<td style="padding:3px 6px;border-bottom:1px solid var(--border);text-align:right">' + (t.enrollment || '?') + '</td>';
-        html += '<td style="padding:3px 6px;border-bottom:1px solid var(--border)">' + (t.phase || '?') + '</td></tr>';
+        html += '<td style="padding:3px 6px;border-bottom:1px solid var(--border);text-align:right">' + escapeHtml(String(t.enrollment || '?')) + '</td>';
+        html += '<td style="padding:3px 6px;border-bottom:1px solid var(--border)">' + escapeHtml(String(t.phase || '?')) + '</td></tr>';
       }
       html += '</tbody></table></div>';
       if (catTrials.length > 20) html += '<div style="font-size:0.75rem;color:var(--text-muted)">+' + (catTrials.length - 20) + ' more</div>';
@@ -25045,9 +25045,9 @@ body.dark-mode .input-error { background: #451a1a !important; }
         var rowBg = i % 2 === 0 ? '' : 'background:var(--bg-alt,#f8fafc);';
         html += '<tr style="' + rowBg + '"><td style="padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap">' + nctLink + '</td>';
         html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)" title="' + escapeHtml(t.title || '') + '">' + escapeHtml(titleShort) + '</td>';
-        html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + (t.enrollment || '?') + '</td>';
-        html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (t.phase || '?') + '</td>';
-        html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (t.startYear || '?') + '</td></tr>';
+        html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + escapeHtml(String(t.enrollment || '?')) + '</td>';
+        html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + escapeHtml(String(t.phase || '?')) + '</td>';
+        html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + escapeHtml(String(t.startYear || '?')) + '</td></tr>';
       }
       html += '</tbody></table></div>';
       if (matchTrials.length > 30) html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Showing 30 of ' + matchTrials.length + '</div>';
@@ -25318,8 +25318,8 @@ body.dark-mode .input-error { background: #451a1a !important; }
       html += '<tr style="' + rowBg + '"><td style="padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap">' + nctLink + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)" title="' + escapeHtml(t.title || '') + '">' + escapeHtml(titleShort) + '</td>';
       html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);color:' + cat.color + '">' + escapeHtml(cat.label) + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + (t.enrollment || '?') + '</td>';
-      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + (t.startYear || '?') + '</td></tr>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:right">' + escapeHtml(String(t.enrollment || '?')) + '</td>';
+      html += '<td style="padding:5px 8px;border-bottom:1px solid var(--border)">' + escapeHtml(String(t.startYear || '?')) + '</td></tr>';
     }
     html += '</tbody></table></div>';
     if (matchTrials.length > 50) html += '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Showing 50 of ' + matchTrials.length + '</div>';
