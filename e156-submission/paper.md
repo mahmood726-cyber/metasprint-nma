@@ -1,6 +1,6 @@
 Mahmood Ahmad
 Tahir Heart Institute
-author@example.com
+mahmood.ahmad2@nhs.net
 
 MetaSprint NMA: Zero-Install Browser Network Meta-Analysis with In-Browser R Cross-Validation
 
