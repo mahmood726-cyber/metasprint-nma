@@ -13,7 +13,8 @@ Key trials (primary kidney composite endpoint):
   EMPA-KIDNEY (NCT03594110) - Empagliflozin - HR 0.72 (0.64-0.82) [from Lancet; CT.gov primary=0.72 0.59-0.89]
 """
 import io, sys, os, time, json, math
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if 'pytest' not in sys.modules and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By

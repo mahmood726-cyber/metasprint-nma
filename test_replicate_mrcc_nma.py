@@ -22,7 +22,8 @@ Published PFS HR ranking (Yanagisawa NMA, SUCRA):
   5. Atez+Bev (near Sunitinib)
 """
 import io, sys, os, time, json, math
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if 'pytest' not in sys.modules and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By

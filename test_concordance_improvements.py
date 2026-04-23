@@ -7,7 +7,8 @@ Test concordance improvements:
   5. Fuzzy match 60% threshold
 """
 import io, os, sys, time, json, unittest
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if 'pytest' not in sys.modules and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By

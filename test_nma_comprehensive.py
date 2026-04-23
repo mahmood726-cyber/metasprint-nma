@@ -3,7 +3,8 @@ Comprehensive Selenium test suite for MetaSprint NMA
 Tests: smoke, math validation, edge cases, dark mode, export
 """
 import io, sys, os, json, time, math, csv, tempfile, traceback
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if 'pytest' not in sys.modules and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -274,8 +275,6 @@ def test_frequentist_nma(driver):
     rank_el = driver.find_element(By.ID, 'rankProbContainer')
     rank_html = rank_el.get_attribute('innerHTML')
     log_result('Rank prob heatmap present (frequentist Monte Carlo)', len(rank_html.strip()) > 0, f'{len(rank_html)} chars')
-
-    return True
 
 # ════════════════════════════════════════════════════════════════════
 # TEST 4: MATH VALIDATION (Frequentist)

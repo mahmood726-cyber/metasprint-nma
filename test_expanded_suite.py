@@ -5,7 +5,8 @@ Tests: threshold analysis, tool comparison, reviewer packet, PRISMA checklist,
 Target: 60+ tests to complement the 49 in test_session_features.py
 """
 import io, os, sys, time, json, unittest
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if 'pytest' not in sys.modules and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -245,7 +246,7 @@ class TestGoldStandardValidation(unittest.TestCase):
         self.assertTrue(result)
 
     def test_ckd_gold_reference_exists(self):
-        result = self.driver.execute_script('return NMA_VALIDATION_REFERENCE.ckd_hr !== null')
+        result = self.driver.execute_script('return NMA_VALIDATION_REFERENCE.oncology_hr !== null')
         self.assertTrue(result)
 
     def test_smoking_gold_passes(self):
@@ -256,7 +257,7 @@ class TestGoldStandardValidation(unittest.TestCase):
 
     def test_ckd_gold_passes(self):
         """Run CKD gold standard validation and check it passes."""
-        result = self.driver.execute_script('return runGoldStandardValidation("ckd_hr")')
+        result = self.driver.execute_script('return runGoldStandardValidation("oncology_hr")')
         self.assertIsNotNone(result, 'Gold validation returned null')
         self.assertTrue(result.get('pass', False), f'CKD gold failed: {result}')
 

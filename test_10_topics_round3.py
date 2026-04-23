@@ -8,7 +8,8 @@ Focus: post-2015 RCTs, diverse disease areas, all data points user-verifiable.
 Topics: nephrology, urology-oncology, gynecologic oncology, cardiology, hepatology
 """
 import io, sys, os, time, json, math, traceback
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if 'pytest' not in sys.modules and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By

@@ -8,7 +8,8 @@ Each topic uses a star network (multiple treatments vs common comparator).
 Identifies issues in: search, extraction, treatment normalization, NMA engine.
 """
 import io, sys, os, time, json, math, traceback
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if 'pytest' not in sys.modules and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
